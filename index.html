@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Hora Dorada</title>
+<meta name="description" content="Juego de rompecabezas: controla la hora del día para mover tu sombra y hacer florecer las flores de luna del desierto.">
+<link rel="icon" href="img/icono.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+<canvas id="lienzo"></canvas>
+
+<!-- HUD -->
+<div id="hud" class="oculto">
+  <div class="barra-sup">
+    <div id="hud-nivel">1. Amanecer</div>
+    <div class="dia">
+      <div id="hud-barra-dia"><span class="ext izq">🌅</span><div class="pista-dia"><span id="hud-sol">☀️</span></div><span class="ext der">🌇</span></div>
+      <div id="hud-hora">6:00 a.m.</div>
+    </div>
+    <div class="recursos">
+      <div class="recurso"><span id="hud-etq-recurso">⏳ Arena</span><div class="pista-arena"><div id="hud-arena"></div></div><span id="hud-arena-txt">100 %</span></div>
+      <div class="chips"><span id="hud-vidas" title="Vidas">♥♥♥</span><span title="Flores de luna">🌼 <b id="hud-flores">0 / 0</b></span><span title="Puntos">✦ <b id="hud-puntos">0</b></span></div>
+    </div>
+  </div>
+  <div id="hud-pista"></div>
+  <div id="aviso"></div>
+  <div id="tactil">
+    <div id="zona-joy"><div id="joy-base"><div id="joy-palanca"></div></div></div>
+    <button class="bt" data-k="atrasar" id="bt-atrasar" aria-label="Regresar el sol">◀☀️</button>
+    <button class="bt" data-k="adelantar" id="bt-adelantar" aria-label="Adelantar el sol">☀️▶</button>
+    <button class="bt" data-k="estirar" id="bt-estirar" aria-label="Estirarse">⇑</button>
+    <button class="bt" data-k="usar" id="bt-usar" aria-label="Usar">F</button>
+    <button class="bt" data-k="pausa" id="bt-pausa" aria-label="Pausa">⏸</button>
+  </div>
+</div>
+
+<!-- Título -->
+<section id="p-titulo" class="pantalla visible">
+  <div class="logo">
+    <h1>HORA<br>DORADA</h1>
+    <p>Mueve el sol. Mueve tu sombra.</p>
+  </div>
+  <div class="menu">
+    <button class="boton grande" id="b-jugar">▶ Jugar</button>
+    <button class="boton" id="b-vestuario">👒 Vestuario</button>
+    <button class="boton" id="b-historia">📜 Historia</button>
+    <button class="boton" id="b-ayuda">Cómo jugar</button>
+    <button class="boton chico" id="b-sonido">🔊 Sonido</button>
+  </div>
+  <p class="pie">Juego original · todo el arte, la música y los efectos se generan con código</p>
+</section>
+
+<!-- Niveles -->
+<section id="p-niveles" class="pantalla oscura">
+  <h2>Elige un nivel</h2>
+  <p id="resumen-niveles" class="tenue"></p>
+  <div id="lista-niveles"></div>
+  <button class="boton chico" id="b-volver-titulo">Volver</button>
+</section>
+
+<!-- Historia (introducción con el storyboard) -->
+<section id="p-historia" class="pantalla oscura">
+  <div class="panel historia">
+    <svg id="historia-vineta" viewBox="20 20 390 230" role="img" aria-label="Viñeta de la historia"><image href="img/storyboard.svg" width="1260" height="640"/></svg>
+    <p id="historia-quien"></p>
+    <p id="historia-texto"></p>
+    <div class="fila">
+      <button class="boton chico" id="b-historia-saltar">Saltar</button>
+      <button class="boton grande" id="b-historia-sig">Siguiente ▶</button>
+    </div>
+  </div>
+</section>
+
+<!-- Vestuario -->
+<section id="p-vestuario" class="pantalla oscura">
+  <h2>Vestuario de Gno</h2>
+  <p id="vestuario-estrellas" class="tenue"></p>
+  <div id="lista-vestuario"></div>
+  <p class="tenue chico-txt">Gana estrellas en los niveles para desbloquear más. ¡Tu sombra también se viste!</p>
+  <button class="boton chico" id="b-cerrar-vestuario">Volver</button>
+</section>
+
+<!-- Intro de nivel -->
+<section id="p-intro" class="pantalla oscura">
+  <div class="panel">
+    <p id="intro-num" class="tenue">Nivel 1</p>
+    <h2 id="intro-nombre">Amanecer</h2>
+    <p id="intro-pista"></p>
+    <button class="boton grande" id="b-comenzar">Comenzar</button>
+    <p class="tenue chico-txt">Enter para empezar · R reinicia · Esc pausa</p>
+  </div>
+</section>
+
+<!-- Cómo jugar -->
+<section id="p-ayuda" class="pantalla oscura">
+  <div class="panel ancho">
+    <h2>Cómo jugar</h2>
+    <p>Eres <b>Gno</b>, el espíritu de un viejo reloj de sol. Las <b>flores de luna</b> del desierto solo abren con tu sombra, y tú decides <b>a qué hora</b> cae.</p>
+    <div class="columnas">
+      <div>
+        <h3>Controles</h3>
+        <table>
+          <tr><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></td><td>Caminar</td></tr>
+          <tr><td><kbd>Q</kbd> / <kbd>E</kbd></td><td>Regresar / adelantar el sol (gasta arena)</td></tr>
+          <tr><td>Rueda del ratón</td><td>También mueve el sol</td></tr>
+          <tr><td><kbd>Espacio</kbd></td><td>Estirarte: tu sombra crece (no puedes caminar)</td></tr>
+          <tr><td><kbd>F</kbd></td><td>Prender o apagar un farol</td></tr>
+          <tr><td><kbd>R</kbd> / <kbd>Esc</kbd> / <kbd>M</kbd></td><td>Reiniciar / pausa / sonido</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3>Reglas del sol</h3>
+        <ul>
+          <li>🌅 <b>Mañana:</b> la sombra es larga y apunta a la izquierda.</li>
+          <li>☀️ <b>Mediodía:</b> la sombra es cortita y apunta hacia arriba.</li>
+          <li>🌇 <b>Tarde:</b> la sombra es larga y apunta a la derecha.</li>
+          <li>Tu sombra <b>pasa sobre los muros</b>; tú no.</li>
+          <li>Las <b>placas lunares</b> abren su puerta mientras tu sombra las cubre. Los <b>sellos ☾</b> se abren para siempre.</li>
+          <li>Los <b>destellos</b> se apagan en tu sombra, pero te lastiman si te tocan.</li>
+          <li>Si llega la noche antes de terminar, pierdes. Entre más arena te sobre, más ★.</li>
+          <li>🌙 <b>De noche</b> cada farol encendido te da su propia sombra.</li>
+          <li>☁️ Bajo una <b>nube</b> no tienes sombra de sol.</li>
+          <li>🪞 Cerca de un <b>espejo</b> tienes una sombra extra que apunta lejos de él (¡hasta hacia abajo!).</li>
+          <li>🌞 Las <b>puertas solares</b> solo abren al mediodía.</li>
+          <li>⏳ Los <b>relojes de arena</b> te dan más arena (o más vela de noche).</li>
+        </ul>
+      </div>
+    </div>
+    <button class="boton" id="b-cerrar-ayuda">Entendido</button>
+  </div>
+</section>
+
+<!-- Pausa -->
+<section id="p-pausa" class="pantalla oscura">
+  <div class="panel">
+    <h2>Pausa</h2>
+    <div class="menu">
+      <button class="boton grande" id="b-continuar">Continuar</button>
+      <button class="boton" id="b-reiniciar">Reiniciar</button>
+      <button class="boton chico" id="b-salir">Niveles</button>
+    </div>
+  </div>
+</section>
+
+<!-- Resultado -->
+<section id="p-resultado" class="pantalla oscura">
+  <div class="panel">
+    <h2 id="res-titulo">¡Las flores despertaron!</h2>
+    <div id="res-estrellas">★★★</div>
+    <p id="res-texto"></p>
+    <div id="res-desglose" class="oculto"></div>
+    <p id="res-final" class="oculto"><b>Gno:</b> ¿Ya? ¿Lo logramos?<br><b>Narrador:</b> Mira a tu alrededor: todas las flores brillan bajo la luna.<br><b>Gno:</b> Entonces puedo descansar… hasta el próximo amanecer.</p>
+    <div class="fila">
+      <button class="boton chico" id="b-res-niveles">Niveles</button>
+      <button class="boton chico" id="b-repetir">Repetir</button>
+      <button class="boton grande" id="b-siguiente">Siguiente ▶</button>
+    </div>
+  </div>
+</section>
+
+<div id="cargando">Cargando…</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

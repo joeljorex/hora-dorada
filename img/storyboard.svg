@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1260 640" font-family="'Trebuchet MS', sans-serif">
+  <rect width="1260" height="640" fill="#2a1d2e"/>
+  <defs>
+    <linearGradient id="atardecer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b2a5f"/><stop offset="1" stop-color="#ff9a4a"/></linearGradient>
+    <linearGradient id="noche" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f1236"/><stop offset="1" stop-color="#2c2f6b"/></linearGradient>
+    <linearGradient id="dia" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd3ff"/><stop offset="1" stop-color="#fff3c4"/></linearGradient>
+    <g id="gno"><path d="M-14 0 Q0 4 14 0 Q9 -24 1 -46 Q0 -48 -1 -46 Q-9 -24 -14 0 Z" fill="#d9774a" stroke="#2a1d2e" stroke-width="2"/><ellipse cx="1" cy="-22" rx="7" ry="6.5" fill="#fff1d6"/><circle cx="-2" cy="-22" r="1.6" fill="#2a1d2e"/><circle cx="4" cy="-22" r="1.6" fill="#2a1d2e"/><ellipse cx="5" cy="-49" rx="6" ry="2.5" fill="#7cc36a" transform="rotate(-25 5 -49)"/></g>
+    <g id="flor"><path d="M0 0 L0 -20" stroke="#4b7d40" stroke-width="3"/><g fill="#fff"><ellipse cx="0" cy="-26" rx="4" ry="9"/><ellipse cx="0" cy="-26" rx="9" ry="4"/></g><circle cx="0" cy="-26" r="3" fill="#ffd36b"/></g>
+    <g id="boton"><path d="M0 0 L0 -18" stroke="#4b7d40" stroke-width="3"/><ellipse cx="0" cy="-22" rx="4" ry="8" fill="#7d5a8f"/></g>
+  </defs>
+
+  <!-- Viñeta 1 -->
+  <g transform="translate(20 20)">
+    <rect width="390" height="230" fill="url(#atardecer)" stroke="#ffc857" stroke-width="3" rx="10"/>
+    <path d="M0 170 Q100 150 200 168 T390 160 L390 230 L0 230 Z" fill="#e9b56a"/>
+    <use href="#boton" x="90" y="190"/><use href="#boton" x="160" y="185"/><use href="#boton" x="300" y="195"/>
+    <circle cx="330" cy="70" r="26" fill="#ffe08a"/>
+    <text x="14" y="30" fill="#fff" font-size="18" font-weight="bold">1</text>
+  </g>
+  <text x="215" y="282" fill="#d9c3b0" font-size="15" text-anchor="middle">El desierto se apaga: las flores de luna ya no abren.</text>
+
+  <!-- Viñeta 2 -->
+  <g transform="translate(435 20)">
+    <rect width="390" height="230" fill="url(#atardecer)" stroke="#ffc857" stroke-width="3" rx="10"/>
+    <path d="M0 175 L390 175 L390 230 L0 230 Z" fill="#e9b56a"/>
+    <rect x="60" y="110" width="70" height="65" fill="#c98a5a"/><rect x="260" y="95" width="80" height="80" fill="#c98a5a"/>
+    <ellipse cx="195" cy="172" rx="55" ry="16" fill="#b9ab98" stroke="#6b5644" stroke-width="3"/>
+    <path d="M190 172 L196 130 L200 172 Z" fill="#8d7f6c"/>
+    <text x="14" y="30" fill="#fff" font-size="18" font-weight="bold">2</text>
+  </g>
+  <text x="630" y="282" fill="#d9c3b0" font-size="15" text-anchor="middle">Entre ruinas de adobe queda un viejo reloj de sol.</text>
+
+  <!-- Viñeta 3 -->
+  <g transform="translate(850 20)">
+    <rect width="390" height="230" fill="url(#atardecer)" stroke="#ffc857" stroke-width="3" rx="10"/>
+    <path d="M0 175 L390 175 L390 230 L0 230 Z" fill="#e9b56a"/>
+    <ellipse cx="195" cy="180" rx="55" ry="16" fill="#b9ab98" stroke="#6b5644" stroke-width="3"/>
+    <circle cx="195" cy="130" r="50" fill="#fff3c4" opacity="0.35"/>
+    <use href="#gno" x="195" y="172"/>
+    <g stroke="#fff3c4" stroke-width="3"><path d="M150 100 L135 88"/><path d="M240 100 L255 88"/><path d="M195 70 L195 52"/></g>
+    <text x="14" y="30" fill="#fff" font-size="18" font-weight="bold">3</text>
+  </g>
+  <text x="1045" y="282" fill="#d9c3b0" font-size="15" text-anchor="middle">La aguja del reloj despierta: es Gno.</text>
+
+  <!-- Viñeta 4 -->
+  <g transform="translate(20 320)">
+    <rect width="390" height="230" fill="url(#dia)" stroke="#ffc857" stroke-width="3" rx="10"/>
+    <path d="M0 140 L390 140 L390 230 L0 230 Z" fill="#f1d39b"/>
+    <path d="M250 190 L70 175 Q60 178 70 182 L250 198 Z" fill="#3b1f4f" opacity="0.6"/>
+    <use href="#gno" x="255" y="196"/><use href="#flor" x="78" y="186"/>
+    <circle cx="360" cy="40" r="20" fill="#ffd36b"/>
+    <text x="14" y="30" fill="#2a1d2e" font-size="18" font-weight="bold">4</text>
+  </g>
+  <text x="215" y="582" fill="#d9c3b0" font-size="15" text-anchor="middle">Al amanecer descubre que su sombra hace florecer.</text>
+
+  <!-- Viñeta 5 -->
+  <g transform="translate(435 320)">
+    <rect width="390" height="230" fill="url(#dia)" stroke="#ffc857" stroke-width="3" rx="10"/>
+    <path d="M0 140 L390 140 L390 230 L0 230 Z" fill="#f1d39b"/>
+    <path d="M40 60 Q195 -10 350 60" stroke="#ff9a4a" stroke-width="4" fill="none" stroke-dasharray="10 8"/>
+    <circle cx="120" cy="38" r="16" fill="#ffd36b"/><circle cx="290" cy="38" r="16" fill="#ffd36b" opacity="0.5"/>
+    <path d="M150 38 L255 38" stroke="#2a1d2e" stroke-width="3"/>
+    <use href="#gno" x="195" y="200"/>
+    <g transform="translate(250 150)"><path d="M-12 -18 L12 -18 L-12 18 L12 18 Z" fill="#e9b55c" stroke="#7a5230" stroke-width="3"/></g>
+    <text x="14" y="30" fill="#2a1d2e" font-size="18" font-weight="bold">5</text>
+  </g>
+  <text x="630" y="582" fill="#d9c3b0" font-size="15" text-anchor="middle">Con la arena del reloj aprende a mover el sol.</text>
+
+  <!-- Viñeta 6 -->
+  <g transform="translate(850 320)">
+    <rect width="390" height="230" fill="url(#noche)" stroke="#ffc857" stroke-width="3" rx="10"/>
+    <path d="M0 160 L390 160 L390 230 L0 230 Z" fill="#7a6a8a"/>
+    <circle cx="330" cy="50" r="22" fill="#fff6d0"/><circle cx="340" cy="44" r="20" fill="#0f1236"/>
+    <use href="#flor" x="70" y="200"/><use href="#flor" x="130" y="205"/><use href="#flor" x="260" y="200"/><use href="#flor" x="320" y="208"/>
+    <use href="#gno" x="195" y="205"/>
+    <g fill="#fff" opacity="0.8"><circle cx="60" cy="40" r="2"/><circle cx="150" cy="70" r="1.5"/><circle cx="230" cy="30" r="2"/></g>
+    <text x="14" y="30" fill="#fff" font-size="18" font-weight="bold">6</text>
+  </g>
+  <text x="1045" y="582" fill="#d9c3b0" font-size="15" text-anchor="middle">Al caer la noche, el desierto vuelve a brillar.</text>
+  <text x="630" y="625" fill="#ffc857" font-size="16" text-anchor="middle" font-weight="bold">HORA DORADA · Storyboard de la introducción</text>
+</svg>

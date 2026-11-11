@@ -1,0 +1,446 @@
+// Lógica de un nivel de HORA DORADA. Todas las medidas están en "casillas" (1 = una casilla del mapa).
+import { NIVELES, mapaCompleto, ANCHO, ALTO } from './niveles.js';
+import { Sonido } from './audio.js';
+
+export const H_JUGADOR = 1.4;     // altura del personaje (define el largo de la sombra)
+export const H_ESTIRADO = 1.95;   // altura con los brazos arriba
+// Altura de cada obstáculo (define el largo de su sombra)
+export const ALTURAS = { '#': 1.0, n: 0.55, c: 1.7, r: 0.5, b: 0.7, g: 0.6, o: 2.0, E: 1.0, L: 1.3, l: 1.3, A: 1.0, B: 1.0, M: 1.1, S: 1.2 };
+const SOLIDOS = new Set(['#', 'n', 'c', 'r', 'w', 'b', 'g', 'o', 'E', 'L', 'l', 'F']);
+const VEL = 3.6;
+const R_JUG = 0.3;
+const RITMO_RELOJ = 0.22;   // cuánto día se mueve por segundo al usar Q/E
+const RADIO_FAROL = 9;
+const RADIO_ESPEJO = 7;
+const ALTO_LUZ = 2.2;
+const SOMBRA_MAX_SOL = 12;
+const SOMBRA_MAX_LUZ = 10;
+export const MEDIODIA = [0.4, 0.6];   // horas en que abre la puerta solar
+
+// Puntaje (ver GDD §17)
+export const PUNTOS = { flor: 100, destello: 50, sello: 200, reloj: 30, golpe: -50, arenaPorciento: 5, vida: 100, rapidezSeg: 2, rapidezLimite: 180 };
+
+// Posición del sol según la hora (t: 0 = amanecer, 1 = anochecer).
+// Devuelve hacia dónde cae la sombra (dx, dy) y la tangente de la elevación del sol.
+export function sol(t) {
+  const a = Math.PI * Math.min(1, Math.max(0, t));
+  const elev = Math.max(0.02, Math.sin(a)) * 1.25;
+  return { dx: -Math.cos(a), dy: -Math.sin(a), tanE: Math.tan(elev) };
+}
+
+// Hora "de reloj" para mostrar: 6:00 a 19:00
+export function horaTexto(t) {
+  const min = Math.round(6 * 60 + Math.min(1, Math.max(0, t)) * 13 * 60);
+  const h = Math.floor(min / 60), m = min % 60;
+  const h12 = ((h + 11) % 12) + 1;
+  return `${h12}:${String(m).padStart(2, '0')} ${h < 12 ? 'a.m.' : 'p.m.'}`;
+}
+
+export class Partida {
+  constructor(indice, { demo = false } = {}) {
+    this.indice = indice;
+    this.def = NIVELES[indice];
+    this.demo = demo;
+    this.eventos = [];
+    this.cargar();
+  }
+
+  cargar() {
+    const filas = mapaCompleto(this.def);
+    this.grid = filas.map(f => f.split(''));
+    this.w = ANCHO; this.h = ALTO;
+    this.flores = []; this.placas = []; this.puertas = []; this.destellos = []; this.faroles = [];
+    this.espejos = []; this.relojes = []; this.rodadoras = [];
+    this.puertaEn = new Map();
+    this.particulas = [];
+    this.salida = null;
+    let inicio = { x: 2.5, y: 2.5 };
+    for (let j = 0; j < this.h; j++) {
+      for (let i = 0; i < this.w; i++) {
+        const ch = this.grid[j][i];
+        const cx = i + 0.5, cy = j + 0.5;
+        if (ch === 'P') { inicio = { x: cx, y: cy }; this.grid[j][i] = '.'; }
+        else if (ch === 'F') this.flores.push({ i, j, x: cx, y: cy, p: 0, abierta: false, anim: 0 });
+        else if (ch === 'X') this.salida = { i, j, x: cx, y: cy, activa: false, anim: 0 };
+        // Placas: "a" abre A, "q" abre B ("b" es biznaga), "m" es sello lunar.
+        else if (ch === 'a' || ch === 'q' || ch === 'm') { this.placas.push({ i, j, x: cx, y: cy, letra: ch === 'q' ? 'b' : ch, activa: false }); this.grid[j][i] = '.'; }
+        else if (ch === 'A' || ch === 'B' || ch === 'M' || ch === 'S') {
+          const p = { i, j, x: cx, y: cy, letra: ch, abierta: false, permanente: ch === 'M', solar: ch === 'S', anim: 0 };
+          this.puertas.push(p); this.puertaEn.set(j * this.w + i, p);
+        }
+        else if (ch === 'd' || ch === 'v') { this.destellos.push({ x: cx, y: cy, eje: ch === 'd' ? 'h' : 'v', dir: Math.random() < 0.5 ? 1 : -1, vel: 2.2, apagado: 0, muerto: false, fase: Math.random() * 6 }); this.grid[j][i] = '.'; }
+        else if (ch === 'L' || ch === 'l') this.faroles.push({ i, j, x: cx, y: cy, encendido: ch === 'L' });
+        else if (ch === 'E') this.espejos.push({ i, j, x: cx, y: cy, activo: false });
+        else if (ch === 'h') { this.relojes.push({ x: cx, y: cy, tomado: false, fase: Math.random() * 6 }); this.grid[j][i] = '.'; }
+        else if (ch === 'u') { this.rodadoras.push({ x: cx, y: cy, y0: cy, vel: 1.2 + Math.random() * 0.8, giro: 0 }); this.grid[j][i] = '.'; }
+      }
+    }
+    this.nubes = (this.def.nubes || []).map(n => ({ ...n, x: n.x0 }));
+    this.jugador = { x: inicio.x, y: inicio.y, vida: 3, invuln: 0, estirado: false, mira: 1, paso: 0, moviendo: false };
+    this.noche = this.def.tipo === 'noche';
+    this.t = this.noche ? 0.5 : this.def.t0;
+    this.arenaMax = this.def.arena || 0; this.arena = this.arenaMax;
+    this.velaMax = this.def.vela || 0; this.vela = this.velaMax;
+    this.estado = 'jugando';
+    this.motivo = '';
+    this.tiempo = 0;
+    this.sombras = [];
+    this.usandoReloj = 0;
+    this.puntos = 0;
+    this.conteo = { flores: 0, destellos: 0, sellos: 0, relojes: 0, golpes: 0 };
+    this.todasAbiertas = this.flores.length === 0;
+    if (this.salida && this.todasAbiertas) this.salida.activa = true;
+    this.actualizarNubes();
+    this.calcularSombras();
+  }
+
+  emitir(tipo, datos) { this.eventos.push({ tipo, datos }); if (!this.demo) Sonido.sfx(tipo); }
+  sumar(tipo) { this.conteo[tipo + 's'] = (this.conteo[tipo + 's'] || 0) + 1; this.puntos += PUNTOS[tipo]; }
+
+  // ---------- Mapa ----------
+  celda(i, j) { return i < 0 || j < 0 || i >= this.w || j >= this.h ? '#' : this.grid[j][i]; }
+  esSolido(i, j) {
+    const ch = this.celda(i, j);
+    if (SOLIDOS.has(ch)) return true;
+    const p = this.puertaEn.get(j * this.w + i);
+    return p ? !p.abierta : false;
+  }
+  alturaEn(i, j) {
+    const ch = this.celda(i, j);
+    const p = this.puertaEn.get(j * this.w + i);
+    if (p) return p.abierta ? 0 : ALTURAS[p.letra];
+    return ALTURAS[ch] || 0;
+  }
+
+  // ---------- Nubes ----------
+  actualizarNubes() {
+    for (const n of this.nubes) {
+      const per = this.w + n.ancho * 2;
+      n.x = (((n.x0 + n.vel * this.tiempo) % per) + per) % per - n.ancho;
+    }
+  }
+  bajoNube(x, y) {
+    for (const n of this.nubes) {
+      const dx = (x - n.x) / n.ancho, dy = (y - n.fila) / n.alto;
+      if (dx * dx + dy * dy <= 1) return true;
+    }
+    return false;
+  }
+
+  // ---------- Sombras ----------
+  sombraDeLuz(lx, ly, radio, h) {
+    const j = this.jugador;
+    const vx = j.x - lx, vy = j.y - ly, d = Math.hypot(vx, vy);
+    if (d > radio || d < 0.35) return null;
+    const L = Math.min(SOMBRA_MAX_LUZ, h * d / Math.max(0.25, ALTO_LUZ - h * 0.55));
+    return { ox: j.x, oy: j.y, dx: vx / d, dy: vy / d, L };
+  }
+
+  calcularSombras() {
+    const j = this.jugador;
+    const h = j.estirado ? H_ESTIRADO : H_JUGADOR;
+    this.sombras.length = 0;
+    if (!this.noche) {
+      const s = sol(this.t);
+      this.sol = s;
+      this.jugadorBajoNube = this.bajoNube(j.x, j.y);
+      if (!this.jugadorBajoNube) this.sombras.push({ ox: j.x, oy: j.y, dx: s.dx, dy: s.dy, L: Math.min(SOMBRA_MAX_SOL, h / s.tanE), fuente: 'sol' });
+      for (const e of this.espejos) {
+        e.activo = this.t > 0.03 && this.t < 0.97 && !this.bajoNube(e.x, e.y) && !this.enSombraDeObjeto(e.x, e.y + 0.6);
+        if (!e.activo) continue;
+        const s2 = this.sombraDeLuz(e.x, e.y, RADIO_ESPEJO, h);
+        if (s2) { s2.fuente = e; this.sombras.push(s2); }
+      }
+    } else {
+      this.sol = null;
+      this.jugadorBajoNube = false;
+      for (const f of this.faroles) {
+        if (!f.encendido) continue;
+        const s2 = this.sombraDeLuz(f.x, f.y, RADIO_FAROL, h);
+        if (s2) { s2.fuente = f; this.sombras.push(s2); }
+      }
+    }
+  }
+
+  // ¿Alguna sombra del jugador cubre el punto (px, py) con radio r?
+  cubre(px, py, r) {
+    for (const s of this.sombras) {
+      const qx = px - s.ox, qy = py - s.oy;
+      const a = qx * s.dx + qy * s.dy;
+      if (a < 0.25 || a > s.L + 0.2) continue;
+      const perp = Math.abs(qx * s.dy - qy * s.dx);
+      const ancho = 0.3 - 0.08 * Math.min(1, a / s.L);
+      if (perp <= ancho + r) return true;
+    }
+    return false;
+  }
+
+  // ¿El punto está en la sombra de un muro u obstáculo? (solo de día)
+  enSombraDeObjeto(x, y) {
+    if (!this.sol) return false;
+    const s = this.sol;
+    const max = Math.min(SOMBRA_MAX_SOL, 2.0 / s.tanE);
+    for (let k = 0.15; k <= max; k += 0.2) {
+      const i = Math.floor(x - s.dx * k), j = Math.floor(y - s.dy * k);
+      const h = this.alturaEn(i, j);
+      if (h > 0 && k <= Math.min(SOMBRA_MAX_SOL, h / s.tanE)) return true;
+    }
+    return false;
+  }
+
+  // ---------- Actualización ----------
+  actualizar(dt, inp) {
+    if (this.estado !== 'jugando') { this.actualizarParticulas(dt); return; }
+    this.tiempo += dt;
+    this.actualizarNubes();
+    this.actualizarRodadoras(dt);
+    if (this.demo) { this.t = (this.t + dt / 30) % 1; this.calcularSombras(); this.actualizarObjetos(dt); this.actualizarParticulas(dt); return; }
+
+    this.actualizarTiempo(dt, inp);
+    if (this.estado !== 'jugando') return;
+    this.actualizarJugador(dt, inp);
+    this.calcularSombras();
+    this.actualizarObjetos(dt);
+    this.actualizarDestellos(dt);
+    this.actualizarRelojes(dt);
+    this.actualizarParticulas(dt);
+    if (inp.usar) this.usar();
+    if (this.salida && this.salida.activa && Math.hypot(this.jugador.x - this.salida.x, this.jugador.y - this.salida.y) < 0.6) this.ganar();
+  }
+
+  actualizarTiempo(dt, inp) {
+    this.usandoReloj = 0;
+    if (this.noche) {
+      this.vela -= dt;
+      if (this.vela <= 0) { this.vela = 0; this.perder('Se apagaron las velas de los faroles'); }
+      return;
+    }
+    this.t += dt / this.def.dia;
+    const dir = (inp.adelantar ? 1 : 0) - (inp.atrasar ? 1 : 0);
+    if (dir !== 0) {
+      if (this.arena > 0) {
+        this.t += dir * RITMO_RELOJ * dt;
+        this.arena = Math.max(0, this.arena - dt);
+        this.usandoReloj = dir;
+      } else if (!this.demo) Sonido.sfx('sinArena');
+    }
+    this.t = Math.max(0, this.t);
+    if (this.t >= 1) { this.t = 1; this.perder('Se hizo de noche antes de terminar'); }
+  }
+
+  actualizarJugador(dt, inp) {
+    const j = this.jugador;
+    j.invuln = Math.max(0, j.invuln - dt);
+    const antes = j.estirado;
+    j.estirado = !!inp.estirar;
+    if (j.estirado && !antes) Sonido.sfx('estirar');
+    let mx = inp.x, my = inp.y;
+    const len = Math.hypot(mx, my);
+    if (len > 1) { mx /= len; my /= len; }
+    if (j.estirado) { mx = 0; my = 0; }
+    j.moviendo = len > 0.1 && !j.estirado;
+    if (Math.abs(mx) > 0.1) j.mira = mx > 0 ? 1 : -1;
+    if (j.moviendo) j.paso += dt * 10;
+    if (j.empuje) {
+      mx += j.empuje.x; my += j.empuje.y;
+      j.empuje.x *= Math.exp(-dt * 8); j.empuje.y *= Math.exp(-dt * 8);
+      if (Math.hypot(j.empuje.x, j.empuje.y) < 0.05) j.empuje = null;
+    }
+    j.x += mx * VEL * dt; this.resolverColision();
+    j.y += my * VEL * dt; this.resolverColision();
+  }
+
+  resolverColision() {
+    const j = this.jugador, r = R_JUG;
+    for (let it = 0; it < 2; it++) {
+      const i0 = Math.floor(j.x - r), i1 = Math.floor(j.x + r), j0 = Math.floor(j.y - r), j1 = Math.floor(j.y + r);
+      for (let jj = j0; jj <= j1; jj++) {
+        for (let ii = i0; ii <= i1; ii++) {
+          if (!this.esSolido(ii, jj)) continue;
+          const cx = Math.max(ii, Math.min(j.x, ii + 1)), cy = Math.max(jj, Math.min(j.y, jj + 1));
+          const dx = j.x - cx, dy = j.y - cy, d2 = dx * dx + dy * dy;
+          if (d2 >= r * r) continue;
+          if (d2 > 1e-9) {
+            const d = Math.sqrt(d2), emp = (r - d) / d;
+            j.x += dx * emp; j.y += dy * emp;
+          } else {
+            const izq = j.x - ii, der = ii + 1 - j.x, arr = j.y - jj, aba = jj + 1 - j.y;
+            const m = Math.min(izq, der, arr, aba);
+            if (m === izq) j.x = ii - r; else if (m === der) j.x = ii + 1 + r; else if (m === arr) j.y = jj - r; else j.y = jj + 1 + r;
+          }
+        }
+      }
+    }
+  }
+
+  jugadorTocaCelda(i, jj) {
+    const j = this.jugador;
+    const cx = Math.max(i, Math.min(j.x, i + 1)), cy = Math.max(jj, Math.min(j.y, jj + 1));
+    return Math.hypot(j.x - cx, j.y - cy) < R_JUG + 0.02;
+  }
+
+  actualizarObjetos(dt) {
+    // Flores
+    let abiertas = 0;
+    for (const f of this.flores) {
+      f.anim += dt;
+      if (f.abierta) { abiertas++; continue; }
+      if (this.cubre(f.x, f.y, 0.38)) {
+        f.p += dt / 0.8;
+        if (Math.random() < 0.3) this.particula(f.x + (Math.random() - 0.5) * 0.6, f.y - 0.2, '#e8d6ff', 0, -0.6, 0.6);
+        if (!this.demo) Sonido.sfx('crece');
+        if (f.p >= 1) {
+          f.abierta = true; f.p = 1; f.anim = 0; abiertas++;
+          if (!this.demo) this.sumar('flor');
+          for (let k = 0; k < 24; k++) { const a = k / 24 * Math.PI * 2; this.particula(f.x, f.y - 0.3, k % 2 ? '#ffffff' : '#ffe9a8', Math.cos(a) * 2, Math.sin(a) * 2 - 0.5, 0.8); }
+          this.emitir('flor');
+        }
+      } else f.p = Math.max(0, f.p - dt * 0.6);
+    }
+    if (!this.todasAbiertas && abiertas === this.flores.length) {
+      this.todasAbiertas = true;
+      if (this.salida) this.salida.activa = true;
+      this.emitir('todas');
+    }
+    if (this.salida) this.salida.anim += dt;
+
+    // Placas
+    for (const p of this.placas) {
+      const antes = p.activa;
+      p.activa = this.cubre(p.x, p.y, 0.42);
+      if (p.activa !== antes && !this.demo) Sonido.sfx(p.activa ? 'placa' : 'placaOff');
+    }
+    // Puertas
+    for (const pu of this.puertas) {
+      pu.anim += dt;
+      const antes = pu.abierta;
+      if (pu.solar) {
+        const mediodia = !this.noche && this.t >= MEDIODIA[0] && this.t <= MEDIODIA[1];
+        pu.abierta = mediodia || (antes && this.jugadorTocaCelda(pu.i, pu.j));
+      } else {
+        const letra = pu.letra.toLowerCase();
+        const suyas = this.placas.filter(p => p.letra === letra);
+        const todas = suyas.length > 0 && suyas.every(p => p.activa);
+        if (pu.permanente) { if (todas) pu.abierta = true; }
+        else pu.abierta = todas || (antes && this.jugadorTocaCelda(pu.i, pu.j));
+      }
+      if (pu.abierta !== antes) {
+        pu.anim = 0;
+        if (pu.permanente && !this.demo) this.sumar('sello');
+        this.emitir(pu.permanente ? 'sello' : 'puerta', pu);
+        for (let k = 0; k < 10; k++) this.particula(pu.x + (Math.random() - 0.5), pu.y + (Math.random() - 0.5) * 0.4, pu.solar ? '#ffd36b' : '#c9a27a', (Math.random() - 0.5) * 2, -Math.random() * 2, 0.5);
+      }
+    }
+  }
+
+  actualizarDestellos(dt) {
+    const j = this.jugador;
+    for (const d of this.destellos) {
+      if (d.muerto) continue;
+      d.fase += dt * 6;
+      if (this.cubre(d.x, d.y, 0.3)) {
+        d.apagado += dt / 0.5;
+        if (Math.random() < 0.5) this.particula(d.x, d.y - 0.4, '#fff3b0', (Math.random() - 0.5) * 2, -Math.random() * 2, 0.4);
+        if (d.apagado >= 1) {
+          d.muerto = true;
+          this.sumar('destello');
+          for (let k = 0; k < 20; k++) { const a = Math.random() * 6.28; this.particula(d.x, d.y - 0.4, k % 2 ? '#fff7cf' : '#ffd36b', Math.cos(a) * 3, Math.sin(a) * 3, 0.6); }
+          this.emitir('destello');
+          continue;
+        }
+      } else d.apagado = Math.max(0, d.apagado - dt * 0.8);
+      const v = d.vel * (1 - d.apagado * 0.8) * dt * d.dir;
+      const nx = d.x + (d.eje === 'h' ? v : 0), ny = d.y + (d.eje === 'v' ? v : 0);
+      const adelante = { x: nx + (d.eje === 'h' ? 0.35 * d.dir : 0), y: ny + (d.eje === 'v' ? 0.35 * d.dir : 0) };
+      const choca = this.esSolido(Math.floor(adelante.x), Math.floor(adelante.y));
+      const aSombra = !this.enSombraDeObjeto(d.x, d.y) && this.enSombraDeObjeto(adelante.x, adelante.y);
+      if (choca || aSombra) d.dir *= -1; else { d.x = nx; d.y = ny; }
+      if (j.invuln <= 0 && Math.hypot(d.x - j.x, d.y - j.y) < 0.6) {
+        j.vida--; j.invuln = 1.3;
+        this.sumar('golpe');
+        const dx = j.x - d.x, dy = j.y - d.y, l = Math.hypot(dx, dy) || 1;
+        j.empuje = { x: dx / l * 2.5, y: dy / l * 2.5 };
+        this.emitir('danio');
+        for (let k = 0; k < 12; k++) this.particula(j.x, j.y - 0.5, '#ff8a6b', (Math.random() - 0.5) * 3, -Math.random() * 3, 0.5);
+        if (j.vida <= 0) this.perder('Los destellos te deshicieron');
+      }
+    }
+  }
+
+  actualizarRelojes(dt) {
+    const j = this.jugador;
+    for (const r of this.relojes) {
+      r.fase += dt * 3;
+      if (r.tomado || Math.hypot(r.x - j.x, r.y - j.y) > 0.6) continue;
+      r.tomado = true;
+      this.sumar('reloj');
+      if (this.noche) this.vela += 20; else this.arena += 2;
+      for (let k = 0; k < 16; k++) { const a = k / 16 * 6.28; this.particula(r.x, r.y - 0.4, '#ffe08a', Math.cos(a) * 2, Math.sin(a) * 2, 0.6); }
+      this.emitir('reloj');
+    }
+  }
+
+  actualizarRodadoras(dt) {
+    for (const r of this.rodadoras) {
+      r.x += r.vel * dt;
+      r.giro += r.vel * dt * 2.5;
+      if (r.x > this.w + 1) r.x = -1;
+      r.y = r.y0 + Math.abs(Math.sin(r.giro * 0.8)) * -0.25;
+    }
+  }
+
+  usar() {
+    const j = this.jugador;
+    let mejor = null, md = 1.4;
+    for (const f of this.faroles) { const d = Math.hypot(f.x - j.x, f.y - j.y); if (d < md) { md = d; mejor = f; } }
+    if (mejor) {
+      mejor.encendido = !mejor.encendido;
+      this.emitir('farol');
+      for (let k = 0; k < 14; k++) this.particula(mejor.x, mejor.y - 1.1, '#ffd36b', (Math.random() - 0.5) * 2, -Math.random() * 2, 0.6);
+    }
+  }
+  farolCercano() {
+    const j = this.jugador;
+    return this.faroles.find(f => Math.hypot(f.x - j.x, f.y - j.y) < 1.4) || null;
+  }
+
+  ganar() {
+    this.estado = 'ganado';
+    const frac = this.noche ? this.vela / this.velaMax : (this.arenaMax ? this.arena / this.arenaMax : 1);
+    this.estrellas = frac >= 0.5 ? 3 : frac >= 0.2 ? 2 : 1;
+    const porciento = Math.min(100, Math.round(frac * 100));
+    this.desglose = [
+      ['Flores de luna', this.conteo.flores, this.conteo.flores * PUNTOS.flor],
+      ['Destellos apagados', this.conteo.destellos, this.conteo.destellos * PUNTOS.destello],
+      ['Sellos rotos', this.conteo.sellos, this.conteo.sellos * PUNTOS.sello],
+      ['Relojes de arena', this.conteo.relojes, this.conteo.relojes * PUNTOS.reloj],
+      ['Golpes recibidos', this.conteo.golpes, this.conteo.golpes * PUNTOS.golpe],
+      [this.noche ? 'Vela restante' : 'Arena restante', porciento + ' %', porciento * PUNTOS.arenaPorciento],
+      ['Vidas', this.jugador.vida, this.jugador.vida * PUNTOS.vida],
+      ['Rapidez', Math.round(this.tiempo) + ' s', Math.max(0, Math.round(PUNTOS.rapidezLimite - this.tiempo)) * PUNTOS.rapidezSeg],
+    ];
+    this.puntaje = Math.max(0, this.desglose.reduce((s, f) => s + f[2], 0));
+    for (let k = 0; k < 40; k++) { const a = Math.random() * 6.28; this.particula(this.salida.x, this.salida.y - 0.5, k % 2 ? '#ffe9a8' : '#ffffff', Math.cos(a) * 4, Math.sin(a) * 4 - 1, 1); }
+    this.emitir('ganar');
+  }
+  perder(motivo) {
+    if (this.estado !== 'jugando') return;
+    this.estado = 'perdido';
+    this.motivo = motivo;
+    this.emitir('perder');
+  }
+
+  // ---------- Partículas ----------
+  particula(x, y, color, vx, vy, vida) {
+    if (this.particulas.length > 400) this.particulas.shift();
+    this.particulas.push({ x, y, vx, vy, vida, max: vida, color });
+  }
+  actualizarParticulas(dt) {
+    for (let i = this.particulas.length - 1; i >= 0; i--) {
+      const p = this.particulas[i];
+      p.vida -= dt;
+      if (p.vida <= 0) { this.particulas.splice(i, 1); continue; }
+      p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 1.5 * dt;
+    }
+  }
+}
