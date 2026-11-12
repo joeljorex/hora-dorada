@@ -1,0 +1,6 @@
+Pon aquí tus grabaciones, una por frase, con el nombre del libreto (docs/Libreto_voces.md):
+historia0.m4a, historia1.m4a, ... controles.m4a, gano.m4a, nivel2.m4a, ... nivel17.m4a
+
+Luego, desde la carpeta hora-dorada:
+    python herramientas/importar_voces.py voces_grabadas
+(agrega --gno-agudo para subir un poco el tono de Gno; --restaurar regresa a las voces de Piper)

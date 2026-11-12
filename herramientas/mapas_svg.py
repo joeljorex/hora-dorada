@@ -19,6 +19,8 @@ COLORES = {
     'A': ('#5ee0ff', 'puertaA'), 'B': ('#ff8fc8', 'puertaB'), 'M': ('#c9a8ff', 'puertaM'), 'S': ('#ffd36b', 'solar'),
     'E': ('#f1d39b', 'espejo'), 'd': ('#f1d39b', 'destelloH'), 'v': ('#f1d39b', 'destelloV'),
     'L': ('#f1d39b', 'farol'), 'l': ('#f1d39b', 'farolOff'),
+    'T': ('#e8c48e', None), 'U': ('#c9a06a', None),             # mesetas baja y alta
+    'Y': ('#a0743f', None), 'H': ('#8a5f2e', None), 'K': ('#8a5f2e', None),  # plataformas fija y móviles
 }
 
 

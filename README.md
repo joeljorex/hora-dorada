@@ -6,7 +6,7 @@
 
 **👉 [Jugar en línea](https://joeljorex.github.io/hora-dorada/)** · funciona en PC y en celular
 
-Juego de rompecabezas para navegador hecho en JavaScript con Canvas 2D. Eres **Gno**, el espíritu de un viejo reloj de sol del desierto de Sonora. Las **flores de luna** solo abren cuando tu sombra las toca, y tú decides **a qué hora del día** cae.
+Juego de rompecabezas en **3D** para navegador, hecho en JavaScript con **Three.js** y sprites pixel art gratuitos (CC0). Eres **Gno**, el espíritu de un viejo reloj de sol del desierto de Sonora. Las **flores de luna** solo abren cuando tu sombra las toca, y tú decides **a qué hora del día** cae.
 
 ## 📋 Datos
 
@@ -14,7 +14,7 @@ Juego de rompecabezas para navegador hecho en JavaScript con Canvas 2D. Eres **G
 |---|---|
 | **Escuela / grupo** | Universidad Tecnológica de Hermosillo (UTH) · IDGS 8-2 |
 | **Materia / docente** | _(completar)_ |
-| **Autor** | Joel Armando Ibarra Rubalcava |
+| **Equipo** | Joel Armando Ibarra Rubalcava y Jorge Humberto Martínez Delgado |
 | **Repositorio** | <https://github.com/joeljorex/hora-dorada> |
 | **Proyecto (tarjetas)** | <https://github.com/joeljorex/hora-dorada/issues> |
 
@@ -26,7 +26,7 @@ Juego de rompecabezas para navegador hecho en JavaScript con Canvas 2D. Eres **G
 | 🖥️ Documento técnico (hardware y software) | [docs/Documento_tecnico.md](docs/Documento_tecnico.md) |
 | 🎬 Storyboard | [img/storyboard.svg](img/storyboard.svg) |
 | 🗺️ Mapa con comportamiento (nivel 4) | [img/mapa_nivel4_comportamiento.svg](img/mapa_nivel4_comportamiento.svg) |
-| 🗺️ Bocetos de los 14 niveles | [img/mapas/](img/mapas/) |
+| 🗺️ Bocetos de los 17 niveles | [img/mapas/](img/mapas/) |
 | 🗂️ Tarjetas del proyecto | [tarjetas/tarjetas.json](tarjetas/tarjetas.json) · [issues](https://github.com/joeljorex/hora-dorada/issues) |
 
 ## 💡 Propuesta
@@ -39,17 +39,29 @@ En casi todos los juegos la sombra es decoración. Aquí es tu herramienta, y la
 
 Con `Q` y `E` regresas o adelantas el sol, y eso gasta la **arena de tu reloj**. Si llega la noche antes de abrir todas las flores, pierdes.
 
-| Amanecer: las flores abren | Del otro lado: la sombra cruza el muro |
+| Título | Amanecer: las flores abren |
 |:---:|:---:|
-| ![Amanecer](img/captura_amanecer.png) | ![Del otro lado](img/captura_otro_lado.png) |
-| **Espejo del oasis: una sombra hacia abajo** | **Tres faroles: tres sombras** |
-| ![Espejo](img/captura_espejo.png) | ![Tres faroles](img/captura_tres_faroles.png) |
+| ![Título](img/captura_titulo.png) | ![Amanecer](img/captura_amanecer.png) |
+| **Cámara girada: la sombra cae hacia otro lado** | **Mesetas: desde lo alto la sombra llega lejos** |
+| ![Cámara](img/captura_camara.png) | ![Mesetas](img/captura_mesetas.png) |
+| **Plataformas sobre el oasis** | **Tres faroles: tres sombras** |
+| ![Plataformas](img/captura_plataformas.png) | ![Tres faroles](img/captura_tres_faroles.png) |
 | **Nubes de agosto** | **Placas lunares** |
 | ![Nubes](img/captura_nubes.png) | ![Placas](img/captura_placas.png) |
 
 ## ✨ Qué trae
 
-- **14 niveles**, de día y de noche, cada uno con una idea nueva.
+- **17 niveles**, de día y de noche, cada uno con una idea nueva.
+- **Cada intento es distinto:** aparecen **ventajas aleatorias** (sombra larga, prisa, tiempo quieto, salto alto, escudo, corazón, doble puntos y semilla mágica), cada nivel trae un **evento** al azar (brisa, día veloz, lluvia de ventajas, tesoro de arena o destellos inquietos) y un **reto** opcional con premio.
+- **Sol y reloj:** el sol (o la luna) cruza el cielo con la hora, y el HUD muestra el cielo y un reloj de manecillas que avanzan con el tiempo y con `Q` / `E`.
+- **Plataformas:** de madera, fijas o que se mueven sobre el agua. Gno salta de una a otra, las plataformas lo llevan y, si cae al agua, vuelve a tierra firme.
+- **Controles configurables:** cada acción se puede reasignar en el menú **Controles** (se guarda en el navegador).
+- **Cámara 3D:** la cámara gira alrededor del mundo (`Z` / `X`) y sube o baja (`C`). El sol siempre sale a la derecha de la cámara, así que **al girarla tu sombra cae hacia otro lado del mapa** y alcanzas flores desde otra perspectiva.
+- **Estudio de voces:** `Estudio de voces.bat` abre una app que muestra el [libreto](docs/Libreto_voces.md), graba cada frase con el micrófono, deja revisarla y la envía al juego.
+- **Voz natural:** Gno y el narrador hablan con voces grabadas con **Piper** (TTS neuronal libre). La música baja mientras hablan. En el nivel 1 Gno dice los controles y el narrador presenta cada nivel.
+- **Interfaz de librerías:** NES.css (botones y paneles), pixelarticons (íconos), Pixelify Sans (fuente) y teclas en sprite del paquete.
+- **Mecánica 3D:** Gno **salta** y se sube a **mesetas de roca**; desde lo alto su sombra llega más lejos y, al saltar, la sombra se despega de sus pies.
+- **Sprites y animaciones** del paquete gratuito [Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) (CC0): personaje que camina en 4 direcciones y salta, destellos animados, flores, faroles con llama y efectos mágicos.
 - Tu sombra **pasa sobre los muros**, aunque tú no puedas cruzarlos.
 - **Placas lunares** que abren su puerta mientras tu sombra las cubre, y **sellos ☾** que se abren para siempre si cubres todos a la vez.
 - **Puertas solares** que solo abren al mediodía.
@@ -59,10 +71,10 @@ Con `Q` y `E` regresas o adelantas el sol, y eso gasta la **arena de tu reloj**.
 - **Destellos:** espíritus de luz que se apagan en tu sombra, pero te lastiman si te tocan.
 - **Relojes de arena** para recoger: más arena de día y más vela de noche.
 - **Puntaje** por eventos con desglose, **estrellas** y récord por nivel.
-- **Vestuario:** sombrero de palma, paliacate, corona de flores y farolito. Se desbloquean con estrellas, y **tu sombra también se viste**.
+- **Vestuario:** cinco disfraces de Gno (sombrero de palma, paliacate, flor en el pelo y espíritu de luz) que se desbloquean con estrellas, y **tu sombra también se viste**.
 - **Historia** al empezar, contada con las viñetas del storyboard.
-- **Escenario del desierto:** saguaros, biznagas, agaves, ocotillos, cráneos, rodadoras con el viento, caminos de piedra, muros de adobe y oasis.
-- **Música y efectos** generados con Web Audio: un tema de día y otro de noche.
+- **Escenario del desierto:** saguaros, biznagas, agaves, ocotillos, cráneos, rodadoras con el viento, caminos de piedra, muros de adobe, mesetas y oasis.
+- **Música y efectos** del mismo paquete: tema de título, de día, de noche y de la historia.
 
 | Historia | Vestuario | Puntaje |
 |:---:|:---:|:---:|
@@ -75,6 +87,9 @@ Con `Q` y `E` regresas o adelantas el sol, y eso gasta la **arena de tu reloj**.
 | Caminar | `W` `A` `S` `D` o flechas | Palanca |
 | Regresar / adelantar el sol | `Q` / `E` o rueda del ratón | ◀☀️ / ☀️▶ |
 | Estirarte (la sombra crece, no caminas) | `Espacio` | ⇑ |
+| Saltar (y subirte a las mesetas) | `J` o `Shift` | ⤒ |
+| Girar la cámara alrededor del mundo | `Z` / `X` | ↺ / ↻ |
+| Cámara alta / baja | `C` | 👁 |
 | Prender o apagar un farol | `F` o `Enter` | F |
 | Reiniciar / pausa / sonido | `R` / `Esc` / `M` | ⏸ |
 
@@ -96,6 +111,9 @@ Con `Q` y `E` regresas o adelantas el sol, y eso gasta la **arena de tu reloj**.
 | 12 | Biznagas | Laberinto con destellos y placa |
 | 13 | Tres faroles | Tres sombras y un farol apagado |
 | 14 | Último atardecer | El gran final: todo junto |
+| 15 | Mesetas | Saltar y alargar la sombra desde lo alto |
+| 16 | Cuatro vientos | Cámara 3D: girar la vista para que la sombra caiga hacia el sur |
+| 17 | Oasis flotante | Plataformas fijas y móviles sobre el agua |
 
 ## 🧮 Puntaje
 
@@ -108,7 +126,11 @@ Ganas ★★★ si te queda 50 % o más de arena (o vela). El detalle está en e
 
 ## 🛠️ Cómo está hecho
 
-- **JavaScript** con módulos ES y **Canvas 2D**, sin librerías ni archivos de imagen dentro del juego.
+- **JavaScript** con módulos ES. El mundo se dibuja en 3D con **Three.js**: muros y mesetas son cajas, y las plantas y personajes son sprites que miran a la cámara. El piso es una textura que se pinta en Canvas 2D con las sombras que calcula el juego.
+- **Librerías** en `lib/` (Three.js, NES.css, pixelarticons) y recursos CC0 en `assets/` (ver [créditos](assets/CREDITOS.md)).
+- **Cámara y sol:** la dirección de la sombra se calcula respecto a la pantalla y se pasa al mapa según hacia dónde mira la cámara (`dirAMapa`).
+- **Eje Z:** Gno tiene altura y gravedad; la sombra del sol va de `z / tan(e)` a `(z + 1.4) / tan(e)`.
+- **Sombras con sprites:** la silueta de cada sprite se proyecta en el suelo con una transformación afín, así que la sombra camina, salta y se viste igual que Gno.
 - **El sol:** dirección `(−cos πt, −sin πt)` y largo `altura / tan(elevación)`.
 - **Sombras de faroles y espejos:** salen de una luz puntual; su largo crece con la distancia.
 - **Sombras de muros y plantas:** envolvente convexa del bloque desplazado en la dirección del sol.
@@ -122,9 +144,17 @@ hora-dorada/
 ├── js/
 │   ├── main.js                # pantallas, controles, progreso, vestuario, historia y bucle
 │   ├── juego.js               # lógica: sol, sombras, flores, placas, puertas, destellos, espejos, nubes, puntaje
-│   ├── dibujo.js              # dibujo: Gno, escenario, sombras, luz del día y de la noche
-│   ├── niveles.js             # los 14 niveles en texto
-│   └── audio.js               # música y efectos
+│   ├── dibujo.js              # dibujo con sprites: Gno, escenario, sombras, luz del día y de la noche
+│   ├── sprites.js             # carga de sprites, recortes y animaciones
+│   ├── mundo3d.js             # mundo 3D y cámara giratoria (Three.js)
+│   ├── historia.js            # historia con escenas de sprites y cuadro de diálogo
+│   ├── voz.js                 # voces grabadas con Piper (y respaldo con Web Speech API)
+│   ├── controles.js           # asignación de teclas que el jugador puede cambiar
+│   ├── iconos.js              # íconos de pixelarticons
+│   ├── niveles.js             # los 15 niveles en texto
+│   └── audio.js               # música (MP3) y efectos (WAV)
+├── assets/                    # sprites, música, efectos y voces CC0 (Ninja Adventure) y CREDITOS.md
+├── lib/                       # Three.js, NES.css y pixelarticons (MIT)
 ├── docs/                      # GDD y documento técnico
 ├── img/                       # splash, storyboard, mapas y capturas
 ├── herramientas/mapas_svg.py  # genera los bocetos de los niveles
@@ -140,8 +170,13 @@ python -m http.server 8000
 
 Luego entra a <http://localhost:8000>. Con `?todo` se desbloquean todos los niveles y vestimentas para probar.
 
-## 👤 Autor
+## 👥 Equipo
 
-**Joel Armando Ibarra Rubalcava** · UTH · IDGS 8-2
+| Integrante | Rol |
+|---|---|
+| **Joel Armando Ibarra Rubalcava** | Programación, Git y diseño de niveles |
+| **Jorge Humberto Martínez Delgado** | Arte, audio, QA y documentación |
 
-Personaje, niveles, arte, música y efectos originales. Código con licencia [MIT](LICENSE).
+UTH · IDGS 8-2
+
+Concepto, mecánicas, niveles e historia originales. Sprites, animaciones, música, efectos y voces: **Ninja Adventure** de Pixel-boy y AAA, licencia CC0. Librerías: Three.js, NES.css y pixelarticons (MIT), fuente Pixelify Sans (OFL) ([créditos](assets/CREDITOS.md)). Código con licencia [MIT](LICENSE).

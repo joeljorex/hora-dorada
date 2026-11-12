@@ -14,7 +14,8 @@
 
 | Foto | Integrante | Rol |
 |:---:|---|---|
-| <img src="../img/foto_pendiente.svg" width="90" alt="Foto"> | **Joel Armando Ibarra Rubalcava** | Diseño, programación, arte, audio y documentación |
+| <img src="../img/foto_pendiente.svg" width="90" alt="Foto"> | **Joel Armando Ibarra Rubalcava** | Programación, Git y diseño de niveles (líder técnico) |
+| <img src="../img/foto_pendiente.svg" width="90" alt="Foto"> | **Jorge Humberto Martínez Delgado** | Arte, audio (música y efectos), QA y documentación |
 
 ## 2. Nombre del juego
 
@@ -65,8 +66,8 @@ Así recorre el desierto: campos de saguaros, oasis con espejos, laberintos de b
 
 | Personaje | Descripción | Comportamiento |
 |---|---|---|
-| **Gno** (protagonista) | Espíritu nacido de la aguja de un reloj de sol. Cuerpo de barro en forma de triángulo, cara redonda color crema, mejillas rosadas y una hojita en la punta. | Camina, se estira para alargar su sombra y mueve el sol con la arena de su reloj. |
-| **Destellos** (obstáculo) | Pequeños espíritus de luz pura: esferas amarillas con rayos. | Patrullan en línea recta y se dan la vuelta al chocar o al encontrar sombra de muros. Si tocan a Gno, le quitan un corazón. Se apagan dentro de la sombra de Gno. |
+| **Gno** (protagonista) | Espíritu nacido de la aguja de un reloj de sol: una flamita naranja (sprite "Flam" del paquete Ninja Adventure, CC0). | Camina, salta, se sube a las mesetas, se estira para alargar su sombra y mueve el sol con la arena de su reloj. |
+| **Destellos** (obstáculo) | Pequeños espíritus de luz pura (sprite "Spirit" del paquete) con un halo dorado. | Patrullan en línea recta y se dan la vuelta al chocar o al encontrar sombra de muros. Si tocan a Gno, le quitan un corazón. Se apagan dentro de la sombra de Gno. |
 | **Flores de luna** (objetivo) | Inspiradas en la "reina de la noche", un cactus real del desierto sonorense que florece de noche. Botón morado que se abre en una flor blanca brillante. | Se abren si la sombra de Gno las cubre un momento. Cuando abren todas, se activa el reloj de sol de salida. |
 
 ## 9. Mecánicas
@@ -78,6 +79,7 @@ La hora va de `t = 0` (amanecer, 6:00 a. m.) a `t = 1` (anochecer, 7:00 p. m.).
 - **Dirección de la sombra:** `(−cos πt, −sin πt)`. En la mañana apunta a la izquierda (oeste), al mediodía hacia arriba (norte) y en la tarde a la derecha (este). Nunca apunta hacia abajo (sur).
 - **Elevación del sol:** `e = 1.25 · sin(πt)` radianes.
 - **Largo de la sombra:** `altura / tan(e)`, con un máximo de 12 casillas. Gno mide 1.4; estirado mide 1.95.
+- **Con altura (eje Z):** si los pies de Gno están a una altura `z`, su sombra empieza a `z / tan(e)` y termina a `(z + 1.4) / tan(e)`.
 
 | Hora | Largo de la sombra de Gno |
 |---|---|
@@ -97,6 +99,82 @@ La hora va de `t = 0` (amanecer, 6:00 a. m.) a `t = 1` (anochecer, 7:00 p. m.).
 8. **Espejos solares:** reflejan el sol y te dan una **segunda sombra** que apunta lejos del espejo. Es la única forma de tener sombra hacia abajo de día.
 9. **Noche:** no hay sol; cada **farol** encendido te da su propia sombra. Las velas se gastan con el tiempo.
 10. Tienes **3 corazones**: si los destellos te los quitan todos, pierdes.
+11. **Saltar y mesetas (mecánica 3D):** Gno puede saltar (sube casi 1 casilla) y subirse a las **mesetas de roca**. Desde lo alto su sombra llega más lejos, y al saltar la sombra se despega de sus pies. En alto, los destellos no lo alcanzan.
+
+### 9.4 Cámara 3D (perspectiva)
+
+El desierto se ve en **3D** (Three.js) y la cámara puede **girar alrededor del mundo** en pasos de 90° (`Z` / `X`) y **subir o bajar** (`C`).
+
+- El sol está fijo respecto a la cámara: **siempre sale a la derecha de la pantalla**. Por eso, al girar la cámara, la sombra cae hacia otro rumbo del mapa.
+- Sin girar, la sombra nunca apunta al sur (abajo). Con la cámara girada sí, y así se alcanzan flores "imposibles".
+- Los controles también son relativos a la cámara: arriba siempre es "hacia el fondo de la pantalla".
+- El HUD muestra qué rumbo queda arriba (Norte, Oeste, Sur o Este).
+
+| Cámara | Rumbo arriba | La sombra de la mañana cae hacia |
+|---|---|---|
+| Inicial | Norte | Oeste |
+| 1 giro a la derecha | Oeste | Sur |
+| 2 giros | Sur | Este |
+| 3 giros | Este | Norte |
+
+### 9.5 Plataformas
+
+| Elemento | Letra en el mapa | Cómo funciona |
+|---|---|---|
+| Plataforma fija | `Y` | Caja de madera a 0.8 sobre el agua; se sube saltando |
+| Plataforma que se mueve de lado | `H` | Va y viene sobre el agua y se da la vuelta en la orilla; si Gno está encima, lo lleva |
+| Plataforma que se mueve de arriba abajo | `K` | Igual, pero en vertical |
+
+- Saltando se puede pasar por encima del agua. Si Gno cae al agua, vuelve al último lugar firme.
+- Al saltar desde una plataforma que se mueve, Gno conserva su impulso y vuelve a caer sobre ella.
+- Encima de una plataforma Gno está a 0.8 de altura, así que su sombra llega más lejos.
+
+### 9.6 Ventajas, eventos y retos (cada intento es distinto)
+
+**Ventajas aleatorias.** Al empezar aparecen 2 en lugares al azar del mapa (4 con el evento *Lluvia de ventajas*) y luego otra cada 20–30 s (máximo 3 a la vez). Duran 30 s en el piso; parpadean antes de desaparecer.
+
+| Ventaja | Efecto | Duración |
+|---|---|---|
+| Sombra larga (gema morada) | La sombra mide 50 % más | 15 s |
+| Prisa (pluma) | Caminas 50 % más rápido | 12 s |
+| Tiempo quieto (gema amarilla) | El sol (o la vela) se detiene | 12 s |
+| Salto alto (gema verde) | Saltas 25 % más alto | 15 s |
+| Escudo (poción azul) | Los destellos no te dañan | 10 s |
+| Corazón (poción roja) | +1 corazón (hasta 4) | — |
+| Doble puntos (copa) | Todos los puntos valen el doble | 20 s |
+| Semilla mágica | Las flores abren al doble de rápido | 15 s |
+
+**Evento del nivel** (uno al azar en cada intento):
+
+| Evento | Qué cambia |
+|---|---|
+| Brisa del desierto | Pasan 2 nubes y 3 rodadoras extra (solo de día) |
+| Día veloz | El sol avanza 30 % más rápido, pero los puntos valen 50 % más |
+| Lluvia de ventajas | Empiezas con 4 ventajas y aparecen más seguido |
+| Tesoro de arena | Hay 2 relojes de arena escondidos |
+| Destellos inquietos | Los destellos van 50 % más rápido y valen el doble |
+
+**Reto opcional** (uno al azar): terminar sin perder corazones, recoger 2 ventajas, apagar todos los destellos, terminar con la mitad de arena o más, o terminar en menos de 2 minutos y medio. Da +300 o +400 puntos.
+
+### 9.7 El sol y el reloj
+
+- En el mundo 3D se ve el **sol** cruzando la parte de arriba de la pantalla: sale por la derecha, sube al mediodía y se pone por la izquierda (de noche se ve la **luna**).
+- En el HUD hay un **cielo** con el sol que avanza con la hora y un **reloj de manecillas** (de 6:00 a. m. a 7:00 p. m.; de noche avanza con la vela). Los dos se mueven solos con el tiempo y más rápido al usar `Q` / `E`.
+
+### 9.8 Altura y salto
+
+El juego se ve desde arriba, pero el mundo tiene un **eje Z** (altura):
+
+| Elemento | Altura | Cómo se usa |
+|---|---|---|
+| Arena | 0 | Piso normal |
+| Meseta baja `T` | 0.8 | Se sube saltando desde la arena |
+| Meseta alta `U` | 1.6 | Se sube saltando desde una meseta baja |
+| Salto | +0.97 | Velocidad inicial 5.4 casillas/s y gravedad 15 casillas/s² (≈0.7 s en el aire) |
+
+- Una meseta solo es pared si Gno está más abajo que su parte de arriba; si salta lo bastante alto, puede caminar sobre ella. Al salir por la orilla, cae con gravedad.
+- La sombra usa la altura real: desde una meseta alta y saltando, Gno tiene `1.6 + 0.97 + 1.4 ≈ 4` de altura, casi **3 veces** más sombra que en la arena.
+- El dibujo también usa la altura: Gno sube en la pantalla, su sombrita de contacto se queda en el piso y se hace chica, y se dibuja encima de lo que tiene enfrente.
 
 ### 9.3 Controles
 
@@ -105,12 +183,17 @@ La hora va de `t = 0` (amanecer, 6:00 a. m.) a `t = 1` (anochecer, 7:00 p. m.).
 | Caminar | `W` `A` `S` `D` / flechas | Palanca |
 | Regresar / adelantar el sol | `Q` / `E` o rueda del ratón | ◀☀️ / ☀️▶ |
 | Estirarse | `Espacio` | ⇑ |
+| Saltar | `J` / `Shift` | ⤒ |
+| Girar la cámara | `Z` / `X` | ↺ / ↻ |
+| Cámara alta / baja | `C` | 👁 |
+
+Todas las teclas se pueden cambiar en el menú **Controles** (dos teclas por acción; se guarda en el navegador).
 | Prender o apagar un farol | `F` / `Enter` | F |
 | Reiniciar / pausa / sonido | `R` / `Esc` / `M` | ⏸ |
 
 ## 10. Niveles
 
-Hay 14 niveles. Cada uno presenta una idea nueva y la combina con las anteriores.
+Hay 17 niveles. Cada uno presenta una idea nueva y la combina con las anteriores.
 
 | # | Nombre | Momento | Idea nueva |
 |---|---|---|---|
@@ -128,6 +211,9 @@ Hay 14 niveles. Cada uno presenta una idea nueva y la combina con las anteriores
 | 12 | Biznagas | Día | Laberinto con destellos y placa |
 | 13 | Tres faroles | Noche | Tres sombras y un farol apagado |
 | 14 | Último atardecer | Día | Gran final: todo junto |
+| 15 | Mesetas | Día | Saltar, subir a mesetas y alargar la sombra desde lo alto (sin arena: el sol sube solo) |
+| 16 | Cuatro vientos | Día | Cámara 3D: una flor en cada rumbo; la del sur solo se alcanza girando la cámara |
+| 17 | Oasis flotante | Día | Plataformas fijas y móviles sobre el agua; la flor del sur pide girar la cámara |
 
 ### 10.1 Mapa bocetado con su comportamiento (Nivel 4: Placas lunares)
 
@@ -138,7 +224,7 @@ Hay 14 niveles. Cada uno presenta una idea nueva y la combina con las anteriores
 3. La puerta **B** necesita que la sombra apunte a la derecha, lo que pasa **al atardecer (≈6:40 p. m.)**. Hay que esperar o gastar arena para llegar a esa hora.
 4. Con la puerta B abierta, corre al reloj de sol antes de que caiga la noche.
 
-Los mapas de los 14 niveles están en [`img/mapas/`](../img/mapas/) y se generan con `herramientas/mapas_svg.py` a partir de `js/niveles.js`.
+Los mapas de los 17 niveles están en [`img/mapas/`](../img/mapas/) y se generan con `herramientas/mapas_svg.py` a partir de `js/niveles.js`.
 
 ## 11. Armas
 
@@ -154,15 +240,15 @@ Hora Dorada no tiene armas de daño. Las "armas" son herramientas de luz y sombr
 
 ## 12. Vestimenta
 
-Gno desbloquea ropa con las estrellas que gana. **La ropa también aparece en su sombra:** el sombrero hace una sombra más ancha y la corona una sombra con picos.
+Gno desbloquea disfraces con las estrellas que gana. Cada uno es un personaje del paquete Ninja Adventure. **El disfraz también aparece en su sombra**, porque la sombra es la silueta del sprite.
 
-| Vestimenta | Se desbloquea con | Descripción |
+| Vestimenta | Se desbloquea con | Sprite del paquete |
 |---|---|---|
-| Hojita | Desde el inicio | La hoja con la que nació Gno |
-| Sombrero de palma | 6 ★ | Para el sol de mediodía |
-| Paliacate | 12 ★ | Rojo con puntitos blancos |
-| Corona de flores | 20 ★ | Hecha con flores de luna |
-| Farolito | 30 ★ | Una lucecita para las noches |
+| Gno de fuego | Desde el inicio | Flam |
+| Sombrero de palma | 6 ★ | Samurai |
+| Paliacate | 12 ★ | NinjaRed |
+| Flor en el pelo | 20 ★ | Princess |
+| Espíritu de luz | 30 ★ | Spirit |
 
 ## 13. Objetos especiales (props y fondo)
 
@@ -180,6 +266,7 @@ Gno desbloquea ropa con las estrellas que gana. **La ropa también aparece en su
 | Espejo solar | Da una segunda sombra |
 | Farol | Da sombra de noche; se prende y apaga |
 | Reloj de arena | +2 s de arena (de día) o +20 s de vela (de noche) |
+| Meseta de roca (baja / alta) | Se sube saltando; desde arriba la sombra llega más lejos |
 
 **Escenario y fondo**
 
@@ -189,9 +276,13 @@ Gno desbloquea ropa con las estrellas que gana. **La ropa también aparece en su
 
 ## 14. Arte
 
-- **Estilo:** 2D vista desde arriba con objetos en perspectiva 3/4. Colores planos y cálidos.
-- **Paleta:** arena `#efcf94`, adobe `#d6955f`, saguaro `#4e9a5b`, sombra mágica violeta `#30124f`, oro `#ffc857`.
-- **Técnica:** todo se dibuja con código en Canvas 2D (figuras, gradientes y transparencias). No hay archivos de imagen dentro del juego.
+- **Estilo:** pixel art 2D (tiles de 16×16) visto desde arriba, con objetos en perspectiva 3/4.
+- **Origen:** todos los sprites y animaciones son del paquete gratuito **Ninja Adventure** de Pixel-boy y AAA, con licencia **CC0**. La lista completa está en [assets/CREDITOS.md](../assets/CREDITOS.md).
+- **Animaciones:** Gno camina en 4 direcciones (4 cuadros), salta, levanta los brazos y tiene pose de derrota; los destellos flotan, las flores se mecen, los faroles tienen llama y el reloj de sol activo tiene un círculo mágico.
+- **Mundo 3D:** Three.js. Muros, muros bajos, mesetas y puertas son cajas texturizadas con el relieve del paquete; plantas, faroles, flores, destellos y Gno son sprites de pie que miran a la cámara. De noche cada farol encendido es una luz real.
+- **Interfaz:** NES.css (botones, paneles, barras, corazones y estrellas), íconos de pixelarticons, fuente Pixelify Sans y teclas del paquete Ninja Adventure.
+- **Historia:** cada viñeta es una escena armada con sprites y el cuadro de diálogo del paquete, con el retrato de quien habla.
+- **Técnica del piso:** los sprites se dibujan en Canvas 2D sin suavizado. Los muros y el oasis se arman por cuartos de 8×8 según sus vecinos (autotile). Las **sombras** son la silueta de cada sprite proyectada en el suelo según la hora, y la luz del día y la noche se calcula con código.
 
 ## 15. Storyboard
 
@@ -261,10 +352,14 @@ puntaje = 100·flores + 50·destellos + 200·sellos + 30·relojes − 50·golpes
 
 | Tema | Cuándo suena | Descripción |
 |---|---|---|
-| **"Arena tibia"** | Niveles de día y título | 88 BPM. Arpegio tranquilo en onda triangular sobre la escala pentatónica de la menor, con bajo suave y campanitas ocasionales. Da calma para pensar. |
-| **"Velas"** | Niveles de noche | 70 BPM. Arpegio en onda senoidal, más lento y espaciado, con acordes que suenan a noche. |
+| **"Adventure Begin"** | Título y menús | Tema de aventura alegre |
+| **"Sunny"** | Niveles de día | Tema soleado y tranquilo |
+| **"Mystical"** | Niveles de noche | Tema misterioso |
+| **"Story (Short)"** | Historia | Tema corto para la introducción |
 
-Toda la música se genera en tiempo real con **Web Audio API** (osciladores y filtros), sin archivos de audio.
+Además: **"Peaceful"** (niveles 9 a 12), **"Ruins"** (niveles 15 y 16) y **"End Theme"** (al terminar el juego).
+
+Todos los temas son del paquete **Ninja Adventure** (CC0), es decir, sin derechos de autor. Se convirtieron de OGG a MP3 y suenan en bucle con un fundido al cambiar de pantalla.
 
 ## 19. Efectos de audio
 
@@ -272,7 +367,11 @@ Toda la música se genera en tiempo real con **Web Audio API** (osciladores y fi
 |---|---|
 | Flor creciendo / abriendo | Tono que sube / arpegio brillante de 4 notas |
 | Todas las flores abiertas | Acorde largo ascendente |
-| Mover el sol | "Arena" continua (ruido filtrado más agudo al adelantar) |
+| Mover el sol | Viento de arena en bucle (más agudo al adelantar) |
+| Saltar / aterrizar | Salto corto / golpe suave |
+| Girar la cámara | Silbido de viento |
+
+**Voz de los personajes:** las frases se grabaron con **Piper**, un motor de voz neuronal libre: Gno usa la voz mexicana "claude" un poco más aguda y el narrador la voz mexicana "ald", más pausada. Gno dice los controles al empezar el nivel 1, el narrador presenta cada nivel y cuenta la historia, y Gno reacciona al ganar o perder. La música baja mientras hablan. Se puede apagar con el botón **Voz**.
 | Placa activada / desactivada | Campana grave / tono que baja |
 | Puerta de madera / sello de piedra | Golpe seco de madera / roca que se arrastra con acorde |
 | Destello apagado | Barrido agudo hacia abajo con chispa |
@@ -311,9 +410,16 @@ main  ←  develop  ←  feature/<número>-<descripción>
 
 | | |
 |---|---|
-| Diseño, programación, arte, audio y documentación | **Joel Armando Ibarra Rubalcava** |
-| Fuente tipográfica | *Baloo 2* (Ek Type), licencia SIL Open Font License, vía Google Fonts |
+| Dirección del proyecto, programación y diseño de niveles | **Joel Armando Ibarra Rubalcava** |
+| Ventajas, eventos y retos aleatorios | **Joel Armando Ibarra Rubalcava** |
+| Selección e integración de sprites y animaciones | **Jorge Humberto Martínez Delgado** |
+| Selección de música y efectos de sonido | **Jorge Humberto Martínez Delgado** |
+| QA y documentación | **Jorge Humberto Martínez Delgado** y **Joel Armando Ibarra Rubalcava** |
+| Sprites, animaciones, música y efectos | Paquete **Ninja Adventure** de **Pixel-boy** y **AAA**, licencia CC0 (<https://pixel-boy.itch.io/ninja-adventure-asset-pack>) |
+| Librerías | **Three.js** (MIT), **NES.css** (MIT), **pixelarticons** (MIT) |
+| Fuente tipográfica | *Pixelify Sans*, licencia SIL Open Font License, vía Google Fonts |
+| Voz | Piper (MIT) con las voces es_MX "claude" (Apache-2.0) y es_MX "ald" (Unlicense) |
 | Tecnologías | JavaScript, Canvas 2D, Web Audio API, GitHub Pages |
 | Inspiración real | La flor "reina de la noche" (*Peniocereus greggii*) y el desierto de Sonora |
 
-Personaje, niveles, arte, música y efectos son originales. El código se publica con licencia MIT.
+El concepto, las mecánicas, los niveles, la historia y el código son originales del equipo. El código se publica con licencia MIT; los recursos del paquete conservan su licencia CC0.

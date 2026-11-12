@@ -1,3 +1,11 @@
 .playwright-mcp/
 __pycache__/
 *.log
+
+# Archivos temporales de Word
+~$*
+# Grabaciones personales (se procesan con herramientas/importar_voces.py) y respaldo local de Piper
+voces_grabadas/*
+!voces_grabadas/LEEME.txt
+assets/audio/voz/lineas_piper/
+__pycache__/

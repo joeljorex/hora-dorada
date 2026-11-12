@@ -11,6 +11,8 @@
 //   E  espejo solar: refleja el sol y te da una segunda sombra (también hacia abajo)
 //   d  destello que patrulla en horizontal          v  destello que patrulla en vertical
 //   L  farol encendido                               l  farol apagado
+//   T  meseta baja (altura 0.8): se sube saltando    U  meseta alta (1.6): se sube saltando desde una T
+//   Y  plataforma de madera fija sobre el agua (0.8)  H / K  plataforma que se mueve de lado / de arriba abajo
 // Las nubes (opcional) se definen con { fila, ancho, alto, vel, x0 } en coordenadas del mapa completo.
 
 export const NIVELES = [
@@ -176,6 +178,7 @@ export const NIVELES = [
   },
   {
     nombre: 'Nubes de agosto',
+    musica: 'tranquila',
     pista: 'Bajo una nube no tienes sombra. Espera a que pase... o aprovecha el sol mientras dura. Los relojes de arena te dan más arena.',
     tipo: 'dia', t0: 0.07, dia: 170, arena: 3,
     nubes: [
@@ -201,6 +204,7 @@ export const NIVELES = [
   },
   {
     nombre: 'Puerta del mediodía',
+    musica: 'tranquila',
     pista: 'Las puertas solares solo abren al mediodía. Planea qué hacer antes, durante y después.',
     tipo: 'dia', t0: 0.05, dia: 200, arena: 4,
     mapa: [
@@ -221,6 +225,7 @@ export const NIVELES = [
   },
   {
     nombre: 'Espejo del oasis',
+    musica: 'tranquila',
     pista: 'El espejo refleja el sol: cerca de él tienes una segunda sombra que apunta lejos del espejo... ¡incluso hacia abajo!',
     tipo: 'dia', t0: 0.3, dia: 180, arena: 3,
     mapa: [
@@ -241,6 +246,7 @@ export const NIVELES = [
   },
   {
     nombre: 'Biznagas',
+    musica: 'tranquila',
     pista: 'Un laberinto de biznagas con destellos. La placa abre la puerta solo con sombra de mañana.',
     tipo: 'dia', t0: 0.1, dia: 200, arena: 4,
     mapa: [
@@ -301,6 +307,68 @@ export const NIVELES = [
       '.......#.........b......',
       '...v...#..k.............',
       '.......#.....F.......X..',
+    ],
+  },
+  {
+    nombre: 'Mesetas',
+    musica: 'ruinas',
+    pista: 'Salta con J (o Shift) y súbete a las mesetas: desde lo alto tu sombra llega más lejos, y si saltas, ¡tu sombra brinca contigo! No hay arena y el sol sube solo: corre a las mesetas antes de que las sombras se encojan.',
+    tipo: 'dia', t0: 0.07, dia: 900, arena: 0,
+    mapa: [
+      '........#www...wwwww....',
+      '..F...g.#www...wwwww....',
+      '........#www...wwFww....',
+      '.....F..#UUT...wwwww....',
+      '.k......#UUT...wwwww....',
+      '#########TTT............',
+      '.........TTT..o......X..',
+      '.....k.............r....',
+      '...c....................',
+      '......b.........F.......',
+      '.............c..........',
+      '..u.................g.P.',
+      '........................',
+    ],
+  },
+  {
+    nombre: 'Cuatro vientos',
+    pista: 'Hay una flor en cada rumbo, pero la sombra nunca cae hacia abajo de la pantalla. Gira la cámara con Z y X: el sol siempre sale a tu derecha.',
+    tipo: 'dia', t0: 0.2, dia: 300, arena: 3, musica: 'ruinas',
+    mapa: [
+      'wwwwwwww#.r....#wwwwwwww',
+      'wwwwwwww#..F...#wwwwwwww',
+      'wwwwwwww########wwwwwwww',
+      '....#..............#....',
+      '.k..#.........u....#.c..',
+      '....#..c...........#....',
+      '...F#.......P......#F...',
+      '....#..............#....',
+      '..o.#....h......X..#..g.',
+      '....#..............#....',
+      'wwwwwwww########wwwwwwww',
+      'wwwwwwww#...F..#wwwwwwww',
+      'wwwwwwww#....b.#wwwwwwww',
+    ],
+  },
+  {
+    nombre: 'Oasis flotante',
+    musica: 'tranquila',
+    pista: 'Salta de plataforma en plataforma sobre el agua (si caes, vuelves a la orilla). Las de madera que se mueven te llevan; desde ahí tu sombra llega más lejos. Gira la cámara para alcanzar la flor del sur.',
+    tipo: 'dia', t0: 0.15, dia: 320, arena: 4,
+    mapa: [
+      '...wwwwwwwwwwwwwwwwww...',
+      '...wwwwwwwwwwwwwwwwww.F.',
+      'c..wwwwwwFwwwwwwwwwww...',
+      '...wwwwwwwwwwwwwwwwww...',
+      '...wwwwwwwwwwwwwwwwww...',
+      '...wwwwww.rwwwwwwwwww..c',
+      '.P.YwYwYw..wHwwwwwwww...',
+      '...wwwwww..wwwwwwwwww...',
+      '...wwwwwwwwwwwwwKwwww...',
+      '...wwwwwwwwwwwwwwwwww.X.',
+      '..gwwwwwwwwwwwwwFwwww...',
+      '...wwwwwwwwwwwwwwwwwwb..',
+      '.k.wwwwwwwwwwwwwwwwww...',
     ],
   },
 ];
