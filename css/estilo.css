@@ -129,3 +129,57 @@ body.tactil #hud-pista { display: none; }
 #intro-extra { display: grid; gap: 4px; margin: 6px 0 10px; text-align: left; font-size: 0.9rem; }
 #intro-extra b { color: #f7d51d; }
 @media (max-width: 900px) { #hud-cielo { width: 120px; } }
+
+/* Tiempo urgente */
+#hud-arena-txt.urgente { color: #e76e55; animation: latido 0.5s steps(2) infinite; }
+@keyframes latido { 50% { opacity: 0.35; } }
+
+/* Celulares: zonas seguras (muesca y barra de inicio de iPhone/Android) y alturas reales de pantalla */
+html, body { height: 100dvh; }
+.pantalla { height: 100dvh; padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+.barra-sup { padding-left: max(14px, env(safe-area-inset-left)) !important; padding-right: max(14px, env(safe-area-inset-right)) !important; padding-top: max(6px, env(safe-area-inset-top)) !important; }
+#hud-efectos { left: max(10px, env(safe-area-inset-left)); }
+#zona-joy { left: env(safe-area-inset-left); bottom: env(safe-area-inset-bottom); }
+.bt { margin-right: env(safe-area-inset-right); margin-bottom: env(safe-area-inset-bottom); }
+#aviso-girar { z-index: 40; }
+
+/* Celular acostado (poca altura): HUD compacto y botones un poco más chicos */
+@media (max-height: 500px) {
+  .barra-sup { gap: 8px; font-size: 0.72rem; padding-top: max(2px, env(safe-area-inset-top)) !important; padding-bottom: 2px !important; }
+  #hud-nivel { display: none; }
+  #hud-cielo { width: 96px; height: 24px; }
+  #hud-reloj { width: 28px; height: 28px; }
+  .dia progress, .recursos progress { height: 14px; }
+  #hud-arena { width: 54px; }
+  .chips { gap: 8px; }
+  #hud-efectos { top: 40px; }
+  #hud-efectos .efecto { font-size: 0.7rem; }
+  #aviso { top: 40px; font-size: 0.8rem; }
+  .bt { width: 52px; height: 46px; font-size: 1rem; }
+  #bt-atrasar { right: 142px; bottom: 12px; } #bt-adelantar { right: 82px; bottom: 12px; } #bt-estirar { right: 22px; bottom: 12px; }
+  #bt-saltar { right: 82px; bottom: 66px; } #bt-usar { right: 22px; bottom: 66px; }
+  #bt-girar-izq { right: 82px; bottom: 120px; } #bt-girar-der { right: 22px; bottom: 120px; }
+  #bt-pausa { top: 40px; } #bt-altura { top: 40px; }
+  #joy-base { width: 96px; height: 96px; left: 20px; bottom: 16px; }
+  .panel { max-height: 92dvh; }
+}
+/* Celular parado: HUD en dos renglones */
+@media (max-width: 600px) and (orientation: portrait) {
+  .barra-sup { flex-wrap: wrap; font-size: 0.72rem; gap: 4px 10px; }
+  .recursos, .chips { gap: 6px; }
+  #hud-cielo { width: 110px; }
+}
+
+.pantalla { overflow-x: hidden; }
+.panel { max-width: min(560px, 100%); }
+.panel.ancho { max-width: min(980px, 100%); }
+/* Título en celular acostado: logo a la izquierda y menú a la derecha */
+@media (max-height: 500px) {
+  #p-titulo { flex-direction: row; gap: 28px; }
+  .logo h1 { font-size: clamp(2rem, 9vh, 3.2rem); }
+  .logo p { font-size: 0.85rem; }
+  .menu { gap: 6px; margin-top: 0; }
+  .menu > .nes-btn { min-width: 210px; font-size: 0.85rem; padding: 2px 10px; }
+  .menu .grande { font-size: 1rem; }
+  .pie { display: none; }
+}

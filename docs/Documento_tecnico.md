@@ -65,7 +65,7 @@ El arte del juego son sprites del paquete gratuito Ninja Adventure (CC0). Estas 
 | | Mínimo |
 |---|---|
 | **PC** | Cualquier equipo que corra un navegador moderno (Chrome 90+, Edge 90+, Firefox 90+, Safari 15+) |
-| **Celular** | Android 9+ o iOS 15+ con navegador actualizado |
+| **Celular** | Android 9+ o iOS 15+ con navegador actualizado. Se adapta a cualquier pantalla (horizontal o vertical) y se puede instalar como app (`manifest.webmanifest`, modo pantalla completa) |
 | **Conexión** | Solo para abrir la página y cargar la fuente; el juego corre en el navegador |
 | **Controles** | Teclado y ratón, o pantalla táctil |
 | **Rendimiento** | Pensado para 60 cuadros por segundo; la escena se ajusta al tamaño de la pantalla |
@@ -104,6 +104,9 @@ hora-dorada/
 - **Cámara 3D:** `vista` = número de giros de 90°. La dirección del sol se calcula en la pantalla, `(−cos πt, −sin πt)`, y se pasa al mapa con `dirAMapa(dx, dy, vista)`; los controles se convierten igual. En Three.js la cámara se coloca en `(sin θ, ·, cos θ)` alrededor del objetivo con `θ = vista · 90°`, y la luz direccional viene del lado contrario a la sombra con la elevación del juego.
 - **Dirección del personaje:** se toma de la dirección del control (en pantalla) con un poco de histéresis en diagonal, y no del movimiento real; así no "gira como loco" cuando choca o se desliza junto a un muro.
 - **Ventajas, eventos y retos:** al cargar el nivel se calculan las casillas alcanzables desde el inicio (relleno por vecinos) para poner ventajas y objetos del evento. Los efectos viven en `partida.efectos` con su tiempo restante; los multiplicadores de puntos se suman como *bono* en el desglose.
+- **Tiempo:** `arena` es el tiempo del nivel; baja 1 s por segundo (3 s por segundo al usar `Q`/`E`). En 0 se llama a `perder()` y la pantalla de resultado sale sin espera.
+- **Fondo:** `Mundo3D.dibujarFondo()` pinta en un lienzo el cielo según la hora y las capas de montañas con desplazamiento según el giro de la cámara, y se usa como `scene.background`.
+- **Pantalla completa y celulares:** Fullscreen API (y bloqueo a horizontal en Android); en iPhone se instala desde *Agregar a pantalla de inicio*. CSS con `env(safe-area-inset-*)`, alturas `dvh` y consultas por altura para el HUD y los botones táctiles; la cámara se aleja en pantallas angostas para que quepa el nivel.
 - **Sol y reloj:** el sol 3D es un sprite hijo de la cámara (en `x = cos(πt)`, arriba de la pantalla); el HUD dibuja el cielo y el reloj en dos lienzos pequeños.
 - **Plataformas:** las fijas (`Y`) cuentan como mesetas de 0.8; las móviles (`H`, `K`) son objetos que avanzan sobre el agua y se dan la vuelta en la orilla. `pisoEn(x, y)` devuelve la altura del piso contando las plataformas; si Gno está encima, se suma el desplazamiento de la plataforma. El agua solo es pared si `z < 0.75`; si Gno aterriza en el agua, vuelve al último lugar firme.
 - **Controles:** `controles.js` guarda un mapa acción → teclas (dos por acción) en `localStorage`; la lectura del teclado y las listas de controles se arman con ese mapa.

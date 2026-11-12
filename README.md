@@ -37,7 +37,7 @@ En casi todos los juegos la sombra es decoración. Aquí es tu herramienta, y la
 - ☀️ **Mediodía:** el sol está arriba; tu sombra es **cortita** y apunta hacia el norte.
 - 🌇 **Tarde:** el sol está al oeste; tu sombra es **larga** y apunta a la **derecha**.
 
-Con `Q` y `E` regresas o adelantas el sol, y eso gasta la **arena de tu reloj**. Si llega la noche antes de abrir todas las flores, pierdes.
+Con `Q` y `E` regresas o adelantas el sol. La **arena de tu reloj es tu tiempo**: baja sola cada segundo y más rápido al mover el sol. **Si se acaba, pierdes al instante** (y también si llega la noche).
 
 | Título | Amanecer: las flores abren |
 |:---:|:---:|
@@ -53,6 +53,8 @@ Con `Q` y `E` regresas o adelantas el sol, y eso gasta la **arena de tu reloj**.
 
 - **17 niveles**, de día y de noche, cada uno con una idea nueva.
 - **Cada intento es distinto:** aparecen **ventajas aleatorias** (sombra larga, prisa, tiempo quieto, salto alto, escudo, corazón, doble puntos y semilla mágica), cada nivel trae un **evento** al azar (brisa, día veloz, lluvia de ventajas, tesoro de arena o destellos inquietos) y un **reto** opcional con premio.
+- **Fondo con montañas según el entorno:** desierto rocoso, oasis con río, montañas verdes con nubes en los niveles con mucha agua, y cielo estrellado de noche. El cielo cambia con la hora y las montañas se desplazan al girar la cámara.
+- **Pantalla completa y celulares:** botón de pantalla completa; en Android y iPhone se adapta a cualquier pantalla (zonas seguras, HUD compacto, controles táctiles) y se puede **instalar como app** desde el menú del navegador (*Agregar a pantalla de inicio*).
 - **Sol y reloj:** el sol (o la luna) cruza el cielo con la hora, y el HUD muestra el cielo y un reloj de manecillas que avanzan con el tiempo y con `Q` / `E`.
 - **Plataformas:** de madera, fijas o que se mueven sobre el agua. Gno salta de una a otra, las plataformas lo llevan y, si cae al agua, vuelve a tierra firme.
 - **Controles configurables:** cada acción se puede reasignar en el menú **Controles** (se guarda en el navegador).

@@ -28,6 +28,8 @@ const ARCHIVOS = {
   sol: 'ui/sol.png',
   luna: 'ui/luna.png',
 };
+// Fondos con montañas (CC0): desierto rocoso (OpenGameArt) y montañas verdes con nubes (Fábio, OpenGameArt)
+for (const f of ['far-mountains', 'nowater-far', 'nowater-mid', 'nowater-close', 'water-far', 'water-mid', 'water-close', 'verde_montanas_lejos', 'verde_montanas_cerca', 'verde_nubes1', 'verde_nubes2']) ARCHIVOS['fondo_' + f] = `fondos/${f}.png`;
 export const TIPOS_VENTAJA = ['sombraLarga', 'prisa', 'solQuieto', 'saltoAlto', 'escudo', 'corazon', 'doblePuntos', 'florRapida'];
 for (const t of TIPOS_VENTAJA) ARCHIVOS['v_' + t] = `ventajas/${t}.png`;
 

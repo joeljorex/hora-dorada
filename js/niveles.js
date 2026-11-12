@@ -312,8 +312,8 @@ export const NIVELES = [
   {
     nombre: 'Mesetas',
     musica: 'ruinas',
-    pista: 'Salta con J (o Shift) y súbete a las mesetas: desde lo alto tu sombra llega más lejos, y si saltas, ¡tu sombra brinca contigo! No hay arena y el sol sube solo: corre a las mesetas antes de que las sombras se encojan.',
-    tipo: 'dia', t0: 0.07, dia: 900, arena: 0,
+    pista: 'Salta con J (o Shift) y súbete a las mesetas: desde lo alto tu sombra llega más lejos, y si saltas, ¡tu sombra brinca contigo! Aquí no puedes mover el sol: sube solo, así que corre a las mesetas antes de que las sombras se encojan.',
+    tipo: 'dia', t0: 0.07, dia: 900, arena: 0, tiempo: 130, solFijo: true,
     mapa: [
       '........#www...wwwww....',
       '..F...g.#www...wwwww....',

@@ -99,6 +99,58 @@ export class Mundo3D {
   }
 
   set listo(v) { this.pintorSuelo.listo = v; this.partida = null; }
+  // Paisaje de fondo: cielo según la hora + capas de montañas que se desplazan al girar la cámara (paralaje)
+  dibujarFondo(P) {
+    const W = 640, H = Math.max(240, Math.round(W * innerHeight / innerWidth));
+    const t = P.noche ? -1 : Math.round(P.t * 200) / 200;
+    const clave = `${this.entorno}|${t}|${Math.round(this.yaw * 40)}|${H}|${Math.floor(performance.now() / 120) * (this.entorno === 'verde' ? 1 : 0)}`;
+    if (clave === this.fondoClave) return;
+    this.fondoClave = clave;
+    if (!this.lienzoFondo || this.lienzoFondo.height !== H) {
+      this.lienzoFondo = document.createElement('canvas'); this.lienzoFondo.width = W; this.lienzoFondo.height = H;
+      this.texFondo = aTextura(this.lienzoFondo);
+      this.escena.background = this.texFondo;
+    }
+    const g = this.lienzoFondo.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    g.globalCompositeOperation = 'source-over';
+    // Cielo
+    const cielo = P.noche ? ['#05071a', '#1b2152'] : P.t < 0.12 ? ['#4b3c7a', '#ffad78'] : P.t > 0.88 ? ['#3b2763', '#ff8456'] : ['#3f95d8', '#bfe6ff'];
+    const gr = g.createLinearGradient(0, 0, 0, H * 0.6);
+    gr.addColorStop(0, cielo[0]); gr.addColorStop(1, cielo[1]);
+    g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    if (P.noche) { g.fillStyle = '#fff'; for (let k = 0; k < 70; k++) g.fillRect((k * 97) % W, (k * 53) % (H * 0.5), k % 7 ? 1 : 2, k % 7 ? 1 : 2); }
+    const giro = this.yaw / (Math.PI * 2);
+    const capa = (nombre, factor, y0, escala) => {
+      const im = IMG['fondo_' + nombre];
+      if (!im) return;
+      const w = im.width * escala, h = im.height * escala;
+      let x = -((giro * factor * W) % w); if (x > 0) x -= w;
+      for (; x < W; x += w) g.drawImage(im, Math.round(x), Math.round(y0), Math.round(w), Math.round(h));
+    };
+    if (this.entorno === 'verde') {
+      const e = W / 270 * 1.15, deriva = performance.now() / 1000;
+      g.globalAlpha = 0.8;
+      const nube = (n, f, v) => { const im = IMG['fondo_' + n]; if (!im) return; const w = im.width * e; let x = -(((giro * f * W) + deriva * v) % w); if (x > 0) x -= w; for (; x < W; x += w) g.drawImage(im, x, H * 0.02, w, im.height * e); };
+      nube('verde_nubes2', 0.1, 4); nube('verde_nubes1', 0.15, 7);
+      g.globalAlpha = 1;
+      capa('verde_montanas_lejos', 0.3, H * 0.62 - 170 * e * 0.62, e);
+      capa('verde_montanas_cerca', 0.55, H * 0.66 - 170 * e * 0.62, e);
+      g.fillStyle = '#1f4f43'; g.fillRect(0, H * 0.66 + 170 * e * 0.38 - 2, W, H);
+    } else {
+      const e = W / 1280 * 1.25, y0 = H * 0.5 - 1280 * e * 0.36;
+      const pre = this.entorno === 'oasis' ? 'water' : 'nowater';
+      capa('far-mountains', 0.15, y0, e);
+      capa(pre + '-far', 0.3, y0, e);
+      capa(pre + '-mid', 0.5, y0, e);
+      capa(pre + '-close', 0.75, y0, e);
+    }
+    // Luz de la hora sobre todo el paisaje
+    const tinteHora = P.noche ? 'rgba(40,50,120,0.75)' : P.t < 0.12 || P.t > 0.88 ? 'rgba(255,140,90,0.35)' : null;
+    if (tinteHora) { g.globalCompositeOperation = 'multiply'; g.fillStyle = tinteHora; g.fillRect(0, 0, W, H); g.globalCompositeOperation = 'source-over'; }
+    this.texFondo.needsUpdate = true;
+  }
+
   ajustar() {
     const w = innerWidth, h = innerHeight;
     this.renderer.setSize(w, h, false);
@@ -130,10 +182,14 @@ export class Mundo3D {
     const piso = new THREE.Mesh(new THREE.PlaneGeometry(P.w, P.h), new THREE.MeshLambertMaterial({ map: this.texSuelo }));
     piso.rotation.x = -Math.PI / 2; piso.position.set(P.w / 2, 0, P.h / 2);
     G.add(piso);
-    // Fuera del mapa: arena oscura
-    const fuera = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshLambertMaterial({ color: '#7a5236' }));
-    fuera.rotation.x = -Math.PI / 2; fuera.position.set(P.w / 2, -0.02, P.h / 2);
-    G.add(fuera);
+    // Base del nivel (como una maqueta) y, detrás, el paisaje con montañas según el entorno
+    const base = new THREE.Mesh(new THREE.BoxGeometry(P.w + 3, 1.2, P.h + 3), new THREE.MeshLambertMaterial({ color: '#8a6040' }));
+    base.position.set(P.w / 2, -0.62, P.h / 2);
+    G.add(base);
+    let agua = 0;
+    for (let j = 0; j < P.h; j++) for (let i = 0; i < P.w; i++) if ('wY'.includes(P.celda(i, j))) agua++;
+    this.entorno = P.noche ? 'noche' : agua >= 60 ? 'verde' : agua > 0 ? 'oasis' : 'desierto';
+    this.fondoClave = '';
 
     // Muros y mesetas: una caja por casilla (InstancedMesh por tipo)
     const matCaja = (img, conBorde) => {
@@ -254,7 +310,8 @@ export class Mundo3D {
     if (im && this.astro.material.userData.im !== im) { this.astro.material.map = aTextura(new THREE.Texture(im)); this.astro.material.map.needsUpdate = true; this.astro.material.userData.im = im; this.astro.material.needsUpdate = true; }
     const t = noche ? 0.5 : Math.min(1, Math.max(0, P.t));
     const x = Math.cos(Math.PI * t) * anchoV * 0.82, y = altoV * (0.48 + 0.34 * Math.sin(Math.PI * t));
-    const tam = 2.6;
+    const tam = noche ? 2.4 : 3.4;
+    this.astro.material.rotation = noche ? 0 : Math.sin(performance.now() / 900) * 0.12;
     this.astro.position.set(x, y, -d); this.astro.scale.set(tam, tam, 1);
     this.astroBrillo.position.set(x, y, -d - 0.1);
     const b = (noche ? 5 : 7) * (0.9 + Math.sin(performance.now() / 400) * 0.05);
@@ -286,12 +343,12 @@ export class Mundo3D {
       this.cielo.color.set(0xfff4e0).lerp(col, Math.min(1, a * 2));
       this.sol.position.set(j.x - P.sol.dx * 10, 10 * P.sol.tanE, j.y - P.sol.dy * 10);
       this.sol.target.position.set(j.x, 0, j.y);
-      this.escena.background.set(P.t > 0.9 ? '#4a2c4a' : '#3b2a2a');
+
     } else {
       this.sol.intensity = 0;
       this.cielo.intensity = 0.28;
       this.cielo.color.set(0x8090ff);
-      this.escena.background.set('#0b0f22');
+
     }
     this.luzGno.intensity = noche ? 1.6 : 0;
     this.luzGno.position.set(j.x, 0.9 + (j.z || 0), j.y);
@@ -372,12 +429,15 @@ export class Mundo3D {
       o.halo.material.opacity = 0.35 + Math.sin(reloj * 4 + v.x) * 0.15;
     }
     this.moverAstro(P);
+    this.dibujarFondo(P);
     for (const o of this.plataformas) o.m.position.set(o.pl.x, Math.sin(reloj * 2 + o.pl.x) * 0.02, o.pl.y);
 
     // Cámara: gira suave hacia el ángulo pedido; en el título da vueltas sola
     if (giroLibre) this.yawObj += dt * 0.15;
     this.yaw += (this.yawObj - this.yaw) * Math.min(1, dt * 7);
-    const pitchObj = this.alta ? 1.0 : 0.6, distObj = this.alta ? Math.max(P.w, P.h) * 1.12 : 13;
+    // En pantallas angostas (celular parado) la cámara se aleja para que quepa el ancho del nivel
+    const ancho = (this.yaw / (Math.PI / 2)) % 2 < 0.5 ? P.w : P.h, ajusteAncho = (ancho + 2) / (2 * Math.tan(THREE.MathUtils.degToRad(this.camara.fov / 2)) * this.camara.aspect) * 0.92;
+    const pitchObj = this.alta ? 1.0 : 0.6, distObj = this.alta ? Math.max(Math.max(P.w, P.h) * 1.12, ajusteAncho) : Math.max(13, ajusteAncho * 0.55);
     this.pitch += (pitchObj - this.pitch) * Math.min(1, dt * 5);
     this.dist += (distObj - this.dist) * Math.min(1, dt * 5);
     const centro = new THREE.Vector3(P.w / 2, 0, P.h / 2), jug = new THREE.Vector3(j.x, j.z || 0, j.y);

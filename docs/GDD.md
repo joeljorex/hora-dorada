@@ -90,8 +90,8 @@ La hora va de `t = 0` (amanecer, 6:00 a. m.) a `t = 1` (anochecer, 7:00 p. m.).
 ### 9.2 Reglas
 
 1. Tu sombra **pasa por encima de los muros**; tú no puedes cruzarlos.
-2. `Q` / `E` mueven el sol y gastan **arena** (1 segundo de arena por segundo de uso). El día también avanza solo.
-3. Si llega la **noche** antes de abrir todas las flores, pierdes.
+2. **La arena del reloj es el tiempo del nivel:** baja sola 1 segundo por segundo; `Q` / `E` mueven el sol y la gastan al triple. Cada nivel trae entre 130 y 194 segundos. **Si se acaba, pierdes al instante.** El día también avanza solo.
+3. Si llega la **noche** antes de abrir todas las flores, también pierdes. Los relojes de arena dan +15 s.
 4. **Placas lunares:** abren su puerta mientras tu sombra las cubre.
 5. **Sellos ☾:** si cubres todos a la vez, su puerta se abre para siempre.
 6. **Puertas solares:** solo están abiertas al mediodía (de 11:12 a. m. a 1:48 p. m.).
@@ -158,6 +158,8 @@ El desierto se ve en **3D** (Three.js) y la cámara puede **girar alrededor del 
 
 ### 9.7 El sol y el reloj
 
+- El sol es el sprite *Smiling Sun* (CC0) pixelado y la luna es de *Sun, Earth and Moon* de Umplix (CC0).
+- **Fondo según el entorno:** detrás de la maqueta del nivel hay un paisaje: desierto rocoso, oasis con río, montañas verdes con nubes (niveles con mucha agua) o desierto de noche con estrellas. El cielo cambia de color con la hora y las capas de montañas se desplazan al girar la cámara (paralaje).
 - En el mundo 3D se ve el **sol** cruzando la parte de arriba de la pantalla: sale por la derecha, sube al mediodía y se pone por la izquierda (de noche se ve la **luna**).
 - En el HUD hay un **cielo** con el sol que avanza con la hora y un **reloj de manecillas** (de 6:00 a. m. a 7:00 p. m.; de noche avanza con la vela). Los dos se mueven solos con el tiempo y más rápido al usar `Q` / `E`.
 

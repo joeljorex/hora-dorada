@@ -117,7 +117,7 @@ function mostrarResultado() {
     $('res-estrellas').innerHTML = estrellasHTML(e, false);
     if (indice === NIVELES.length - 1) Sonido.musica('final');
     Voz.decir(e === 3 ? '¡Tres estrellas! ¡Qué bonito brillan!' : '¡Lo logramos!', 'Gno', e === 3 ? 'gano3' : 'gano');
-    const recurso = partida.noche ? `Vela restante: ${Math.round(partida.vela)} s` : `Arena restante: ${Math.round(partida.arena / partida.arenaMax * 100)} %`;
+    const recurso = partida.noche ? `Vela restante: ${Math.round(partida.vela)} s` : `Tiempo restante: ${mmss(partida.arena)}`;
     $('res-texto').textContent = `${recurso} · Tiempo: ${Math.floor(partida.tiempo / 60)}:${String(Math.floor(partida.tiempo % 60)).padStart(2, '0')}`;
     const record = progreso.puntajes[indice] || 0;
     const nuevo = partida.puntaje > record;
@@ -211,7 +211,7 @@ function terminarHistoria() {
 // ---------- Controles en pantalla (teclas = sprites del paquete Ninja Adventure; se pueden reasignar) ----------
 const GRUPOS = [
   [['arriba', 'izquierda', 'abajo', 'derecha'], 'Caminar'],
-  [['atrasar', 'adelantar'], 'Regresar / adelantar el sol (gasta arena)'],
+  [['atrasar', 'adelantar'], 'Regresar / adelantar el sol (gasta más arena: la arena es tu tiempo)'],
   [['girarIzq', 'girarDer'], 'Girar la cámara alrededor del mundo: tu sombra cae hacia otro lado'],
   [['altura'], 'Subir o bajar la cámara'],
   [['estirar'], 'Estirarte: tu sombra crece'],
@@ -271,6 +271,44 @@ function estrellasHTML(n, chico = true) {
   const c = chico ? ' is-small' : '';
   return `<i class="nes-icon star${c}"></i>`.repeat(n) + `<i class="nes-icon star is-empty${c}"></i>`.repeat(3 - n);
 }
+// ---------- Pantalla completa y celulares (iOS / Android) ----------
+const docEl = document.documentElement;
+const hayFullscreen = !!(docEl.requestFullscreen || docEl.webkitRequestFullscreen);
+const enPantallaCompleta = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+async function alternarPantallaCompleta() {
+  if (!hayFullscreen) {
+    // iPhone no deja poner una página en pantalla completa: se instala como app
+    aviso('En iPhone: Compartir → "Agregar a pantalla de inicio" y ábrelo desde ahí');
+    return;
+  }
+  try {
+    if (enPantallaCompleta()) await (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    else {
+      await (docEl.requestFullscreen || docEl.webkitRequestFullscreen).call(docEl, { navigationUI: 'hide' });
+      if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+    }
+  } catch (e) { aviso('Tu navegador no permitió la pantalla completa'); }
+}
+function actualizarBotonPantalla() {
+  const html = enPantallaCompleta() ? `${icono('close')} Salir de pantalla completa` : `${icono('expand')} Pantalla completa`;
+  for (const id of ['b-pantalla', 'b-pantalla-pausa']) $(id).innerHTML = html;
+}
+document.addEventListener('fullscreenchange', () => { actualizarBotonPantalla(); setTimeout(ajustarTodo, 150); });
+document.addEventListener('webkitfullscreenchange', () => { actualizarBotonPantalla(); setTimeout(ajustarTodo, 150); });
+actualizarBotonPantalla();
+// En celular vertical se sugiere girarlo (se puede seguir así)
+let girarDescartado = false;
+function revisarOrientacion() {
+  const vertical = innerHeight > innerWidth * 1.05 && esTactil;
+  $('aviso-girar').classList.toggle('oculto', !vertical || girarDescartado);
+}
+function ajustarTodo() {
+  if (mundo) mundo.ajustar(); else pintor.ajustar();
+  revisarOrientacion();
+}
+addEventListener('orientationchange', () => setTimeout(ajustarTodo, 250));
+if (window.visualViewport) visualViewport.addEventListener('resize', ajustarTodo);
+
 function alturaCamara() {
   if (mundo && estado === 'jugando') aviso(mundo.alternarAltura() ? 'Cámara alta: ves todo el nivel' : 'Cámara baja: más 3D, sigue a Gno');
 }
@@ -306,10 +344,15 @@ function actualizarHUD() {
     poner('hud-arena-txt', `${Math.ceil(P.vela)} s`);
   } else {
     poner('hud-hora', horaTexto(P.t));
-    poner('hud-etq-recurso', `${icono('hourglass')} Arena`, 'innerHTML');
+    poner('hud-etq-recurso', `${icono('hourglass')} Tiempo`, 'innerHTML');
     const f = P.arenaMax ? P.arena / P.arenaMax : 0;
     poner('hud-arena', Math.round(f * 100), 'value');
-    poner('hud-arena-txt', `${Math.round(f * 100)} %`);
+    poner('hud-arena-txt', mmss(P.arena));
+    // Últimos 10 segundos: el tiempo se pone rojo y suena un aviso cada segundo
+    const seg = Math.ceil(P.arena), urgente = seg <= 10;
+    hud['hud-arena-txt'].classList.toggle('urgente', urgente);
+    if (urgente && seg !== ultimoSegundo && estado === 'jugando') { Sonido.sfx('sinArena'); if (seg === 10) aviso('¡Quedan 10 segundos de arena!'); }
+    ultimoSegundo = seg;
   }
   const vida = Math.max(0, Math.min(3, P.jugador.vida));
   poner('hud-vidas', '<i class="nes-icon heart is-small"></i>'.repeat(vida) + '<i class="nes-icon heart is-small is-empty"></i>'.repeat(3 - vida), 'innerHTML');
@@ -352,6 +395,9 @@ function dibujarReloj(P) {
   mano((min % 60) / 60 * Math.PI * 2, 14, 2, '#e76e55');
   g.fillStyle = '#f7d51d'; g.fillRect(c - 2, c - 2, 4, 4);
 }
+
+let ultimoSegundo = 0;
+const mmss = s => { const t = Math.max(0, Math.ceil(s)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
 
 let avisoTimer = null;
 function aviso(texto) {
@@ -466,6 +512,9 @@ clic('b-comenzar', comenzar);
 clic('b-continuar', reanudar);
 clic('b-reiniciar', reiniciar);
 clic('b-salir', irANiveles);
+clic('b-pantalla', alternarPantallaCompleta);
+clic('b-pantalla-pausa', alternarPantallaCompleta);
+clic('b-girar-ok', () => { $('aviso-girar').classList.add('oculto'); girarDescartado = true; });
 clic('b-controles', () => irAControles('titulo'));
 clic('b-controles-pausa', () => irAControles('pausa'));
 clic('b-restablecer', () => { Controles.restablecer(); esperandoTecla = null; pintarTablaControles(); pintarListasControles(); });
@@ -486,7 +535,8 @@ function actualizarBotonVoz(a) { $('b-voz').innerHTML = a ? `${icono('message')}
 $('b-voz').innerHTML = Voz.estaActiva() ? `${icono('message')} Voz` : `${icono('close')} Sin voz`;
 if (!Voz.disponible) $('b-voz').classList.add('oculto');
 document.addEventListener('pointerdown', () => Sonido.iniciar(), { once: true });
-addEventListener('resize', () => { if (!mundo) pintor.ajustar(); });
+addEventListener('resize', () => { if (!mundo) pintor.ajustar(); revisarOrientacion(); });
+revisarOrientacion();
 
 // ---------- Bucle ----------
 let anterior = performance.now(), reloj = 0;
@@ -510,14 +560,15 @@ function bucle(ahora) {
       if (ev.tipo === 'danio' && mundo) mundo.temblar(0.45);
       if (ev.tipo === 'ventaja') { const v = VENTAJAS[ev.datos.tipo]; aviso(`¡${v.nombre}! ${v.desc}`); }
       if (ev.tipo === 'ventajaFin') aviso(`Se acabó: ${VENTAJAS[ev.datos.tipo].nombre}`);
-      if (ev.tipo === 'reloj') aviso(partida.noche ? '+20 s de vela' : '+2 s de arena del reloj');
+      if (ev.tipo === 'reloj') aviso(partida.noche ? '+20 s de vela' : '+15 s de arena (tiempo)');
       if (ev.tipo === 'puerta' && ev.datos && ev.datos.solar && ev.datos.abierta && !yaAviso.solar) { yaAviso.solar = true; aviso('¡Mediodía! Las puertas solares están abiertas'); }
     }
     partida.eventos.length = 0;
-    if (!partida.noche && partida.arena <= 0 && (entrada.atrasar || entrada.adelantar) && !yaAviso.arena) { yaAviso.arena = true; aviso('Se acabó la arena del reloj: el sol sigue solo'); }
     if (partida.noche && (entrada.atrasar || entrada.adelantar) && !yaAviso.noche) { yaAviso.noche = true; aviso('De noche no hay sol: usa los faroles (F)'); }
     actualizarHUD();
-    if (partida.estado !== 'jugando') setTimeout(mostrarResultado, 900), estado = 'esperando';
+    // Perder es instantáneo; al ganar se espera un momento para ver la celebración
+    if (partida.estado === 'perdido') { if (mundo) mundo.temblar(0.5); mostrarResultado(); }
+    else if (partida.estado !== 'jugando') setTimeout(mostrarResultado, 900), estado = 'esperando';
   } else partida.eventos.length = 0;
   if (mundo) mundo.dibujar(partida, reloj, dt, estado === 'titulo'); else pintor.dibujar(partida, reloj);
 }

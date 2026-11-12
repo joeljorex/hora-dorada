@@ -45,6 +45,9 @@
     {"titulo": "Sol en el cielo y reloj de manecillas", "etiquetas": ["arte", "programación"], "sprint": 3, "estado": "Hecho", "detalle": "Avanzan con la hora; el sol sale por la derecha como en el juego."},
     {"titulo": "Ventajas, eventos y retos aleatorios por nivel", "etiquetas": ["diseño", "programación"], "sprint": 3, "estado": "Hecho", "detalle": "8 ventajas, 5 eventos y 5 retos; cada intento es distinto."},
     {"titulo": "Estudio de voces (grabar el libreto)", "etiquetas": ["audio", "programación"], "sprint": 3, "estado": "Hecho", "detalle": "App local que muestra el libreto, graba, deja revisar y envía al juego."},
+    {"titulo": "La arena es el tiempo: perder al instante al acabarse", "etiquetas": ["diseño", "programación"], "sprint": 3, "estado": "Hecho", "detalle": "Baja sola y al triple con Q/E; aviso en los últimos 10 s."},
+    {"titulo": "Fondo con montañas según el entorno y sol con carita", "etiquetas": ["arte"], "sprint": 3, "estado": "Hecho", "detalle": "Desierto, oasis, naturaleza y noche; paralaje al girar la cámara."},
+    {"titulo": "Pantalla completa y adaptación a celulares (iOS y Android)", "etiquetas": ["programación", "diseño"], "sprint": 3, "estado": "Hecho", "detalle": "Fullscreen, zonas seguras, HUD compacto e instalación como app."},
     {"titulo": "Agregar fotos de los integrantes, materia y docente", "etiquetas": ["documentación"], "sprint": 3, "estado": "Por hacer", "detalle": "Reemplazar img/foto_pendiente.svg y completar los datos del README y del GDD."},
     {"titulo": "Grabar video de presentación del juego", "etiquetas": ["documentación"], "sprint": 3, "estado": "Por hacer", "detalle": "Mostrar la mecánica, un nivel de día, uno de noche y el código."},
     {"titulo": "Tablero de GitHub Projects", "etiquetas": ["git"], "sprint": 3, "estado": "En progreso", "detalle": "Requiere el permiso project en gh (gh auth refresh -s project)."}

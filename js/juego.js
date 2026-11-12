@@ -125,7 +125,9 @@ export class Partida {
     this.jugador = { x: inicio.x, y: inicio.y, z: 0, vz: 0, piso: 0, enAire: false, vida: 3, invuln: 0, estirado: false, mira: 1, paso: 0, moviendo: false };
     this.noche = this.def.tipo === 'noche';
     this.t = this.noche ? 0.5 : this.def.t0;
-    this.arenaMax = this.def.arena || 0; this.arena = this.arenaMax;
+    // La arena del reloj es el TIEMPO del nivel: baja sola cada segundo y más rápido al mover el sol (Q/E).
+    this.arenaMax = this.noche ? 0 : (this.def.tiempo || Math.max(80, Math.min(200, Math.round(70 + 12 * this.flores.length + 8 * this.placas.length + 6 * this.destellos.length + 6 * this.puertas.length + 6 * (this.def.arena || 0)))));
+    this.arena = this.arenaMax;
     this.velaMax = this.def.vela || 0; this.vela = this.velaMax;
     this.estado = 'jugando';
     this.motivo = '';
@@ -398,16 +400,20 @@ export class Partida {
       if (this.vela <= 0) { this.vela = 0; this.perder('Se apagaron las velas de los faroles'); }
       return;
     }
-    if (!this.efectos.solQuieto) this.t += dt / this.def.dia * this.ritmoDia;
-    const dir = (inp.adelantar ? 1 : 0) - (inp.atrasar ? 1 : 0);
-    if (dir !== 0) {
-      if (this.arena > 0) {
-        this.t += dir * RITMO_RELOJ * dt;
-        this.arena = Math.max(0, this.arena - dt);
-        this.usandoReloj = dir;
-      } else if (!this.demo) Sonido.sfx('sinArena');
+    const quieto = this.efectos.solQuieto;
+    if (!quieto) {
+      this.t += dt / this.def.dia * this.ritmoDia;
+      if (!this.demo) this.arena -= dt;            // la arena baja sola: es el tiempo
     }
+    const dir = this.def.solFijo ? 0 : (inp.adelantar ? 1 : 0) - (inp.atrasar ? 1 : 0);
+    if (dir !== 0 && this.arena > 0) {
+      this.t += dir * RITMO_RELOJ * dt;
+      if (!this.demo) this.arena -= dt * 2;         // mover el sol gasta el triple
+      this.usandoReloj = dir;
+    }
+    this.arena = Math.max(0, this.arena);
     this.t = Math.max(0, this.t);
+    if (!this.demo && this.arenaMax > 0 && this.arena <= 0) { this.perder('¡Se acabó el tiempo! La arena del reloj se terminó'); return; }
     if (this.t >= 1) { this.t = 1; this.perder('Se hizo de noche antes de terminar'); }
   }
 
@@ -622,7 +628,7 @@ export class Partida {
       if (r.tomado || Math.hypot(r.x - j.x, r.y - j.y) > 0.6) continue;
       r.tomado = true;
       this.sumar('reloj');
-      if (this.noche) this.vela += 20; else this.arena += 2;
+      if (this.noche) this.vela += 20; else this.arena = Math.min(this.arenaMax + 30, this.arena + 15);
       for (let k = 0; k < 16; k++) { const a = k / 16 * 6.28; this.particula(r.x, r.y - 0.4, '#ffe08a', Math.cos(a) * 2, Math.sin(a) * 2, 0.6); }
       this.emitir('reloj');
     }

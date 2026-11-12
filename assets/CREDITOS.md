@@ -58,6 +58,15 @@ Solo se copiaron al proyecto los archivos que el juego usa. Algunos se renombrar
 | `personajes/flam_cara.png`, `personajes/estatua_cara.png` | Actor/Character/Flam/Faceset.png, Statue/Faceset.png | Retratos de Gno y del narrador |
 | `personajes/*_jump.png` | Actor/Character/*/SeparateAnim/Jump.png | Salto |
 
+## Sol, luna y fondos (OpenGameArt, CC0)
+
+| Archivo | Original | Autor / licencia |
+|---|---|---|
+| `ui/sol.png` | *Smiling Sun* (smilling_sun.png), pixelado a 48 px | OpenGameArt, CC0 |
+| `ui/luna.png` | *Sun, Earth and Moon* (moon_4.png), recortada | Umplix, CC0 |
+| `fondos/far-mountains.png`, `nowater-*.png`, `water-*.png` | *Rocky desert landscape (layered, looping)* | OpenGameArt, CC0 (derivado de un fondo CC0 de Quantiset) |
+| `fondos/verde_*.png` | *Background clouds and mountains parallax* | Fábio, OpenGameArt, CC0 |
+
 ## Música (`audio/musica/`)
 
 | Archivo | Original | Cuándo suena |

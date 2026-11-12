@@ -6,6 +6,14 @@
 <title>Hora Dorada</title>
 <meta name="description" content="Juego de rompecabezas: controla la hora del día y gira la cámara para mover tu sombra y hacer florecer las flores de luna del desierto.">
 <link rel="icon" href="img/icono.svg" type="image/svg+xml">
+<!-- Para celulares: se puede instalar como app y abrir en pantalla completa (iOS y Android) -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="img/icono-192.png">
+<meta name="theme-color" content="#212529">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hora Dorada">
 <!-- Librerías: fuente pixel (Google Fonts), componentes de interfaz (NES.css) e íconos (pixelarticons, en lib/) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,6 +79,7 @@
       <button class="nes-btn chico" id="b-sonido"><i class="px" data-icono="volume-3"></i> Sonido</button>
       <button class="nes-btn chico" id="b-voz"><i class="px" data-icono="message"></i> Voz</button>
     </div>
+    <button class="nes-btn chico" id="b-pantalla"><i class="px" data-icono="expand"></i> Pantalla completa</button>
   </div>
   <p class="pie">Sprites, música y voces: <a href="assets/CREDITOS.md" target="_blank" rel="noopener">Ninja Adventure</a> (CC0) · Interfaz: NES.css · Íconos: pixelarticons · Fuente: Pixelify Sans</p>
 </section>
@@ -140,7 +149,7 @@
           <li>Los <b>destellos</b> se apagan en tu sombra, pero te lastiman si te tocan.</li>
           <li>De <b>noche</b> cada farol encendido te da su propia sombra.</li>
           <li>Bajo una <b>nube</b> no tienes sombra; un <b>espejo</b> te da una extra.</li>
-          <li>Si llega la noche antes de terminar, pierdes. Entre más arena te sobre, más estrellas.</li>
+          <li><b>La arena del reloj es tu tiempo:</b> baja sola cada segundo y más rápido al mover el sol. Si se acaba, pierdes al instante. Entre más arena te sobre, más estrellas.</li>
         </ul>
       </div>
     </div>
@@ -169,6 +178,7 @@
       <button class="nes-btn is-warning grande" id="b-continuar"><i class="px" data-icono="play"></i> Continuar</button>
       <button class="nes-btn" id="b-reiniciar"><i class="px" data-icono="reload"></i> Reiniciar</button>
       <button class="nes-btn" id="b-controles-pausa"><i class="px" data-icono="keyboard"></i> Controles</button>
+      <button class="nes-btn" id="b-pantalla-pausa"><i class="px" data-icono="expand"></i> Pantalla completa</button>
       <button class="nes-btn" id="b-salir"><i class="px" data-icono="map"></i> Niveles</button>
       <button class="nes-btn is-error" id="b-menu"><i class="px" data-icono="home"></i> Salir al menú</button>
     </div>
@@ -190,6 +200,13 @@
     </div>
   </div>
 </section>
+
+<div id="aviso-girar" class="pantalla oscura visible oculto">
+  <div class="nes-container is-dark is-rounded panel">
+    <p><i class="px" data-icono="device-phone"></i> Gira tu celular para jugar mejor.</p>
+    <button class="nes-btn chico" id="b-girar-ok">Jugar así</button>
+  </div>
+</div>
 
 <div id="cargando">Cargando…</div>
 <script type="module" src="js/main.js"></script>
